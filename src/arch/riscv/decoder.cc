@@ -85,7 +85,8 @@ Decoder::decode(ExtMachInst mach_inst, Addr addr)
     DPRINTF(Decode, "Decoding instruction 0x%08x at address %#x\n",
             mach_inst, addr);
 
-    StaticInstPtr &si = instMap[mach_inst];
+    //If mach_inst not in instMap, the idea of a reference will add it in.
+    StaticInstPtr &si = instMap[mach_inst];            
     if (!si)
         si = decodeInst(mach_inst);
 

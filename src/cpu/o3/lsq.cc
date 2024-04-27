@@ -68,6 +68,10 @@ LSQ::DcachePort::DcachePort(LSQ *_lsq, CPU *_cpu) :
     RequestPort(_cpu->name() + ".dcache_port", _cpu), lsq(_lsq), cpu(_cpu)
 {}
 
+LSQ::FedexCentralPort::FedexCentralPort(LSQ *_lsq, CPU *_cpu) :
+    RequestPort(_cpu->name() + ".to_fedex_central", _cpu), lsq(_lsq), cpu(_cpu)
+{}
+
 LSQ::LSQ(CPU *cpu_ptr, IEW *iew_ptr, const BaseO3CPUParams &params)
     : cpu(cpu_ptr), iewStage(iew_ptr),
       _cacheBlocked(false),
@@ -83,6 +87,7 @@ LSQ::LSQ(CPU *cpu_ptr, IEW *iew_ptr, const BaseO3CPUParams &params)
       maxSQEntries(maxLSQAllocation(lsqPolicy, SQEntries, params.numThreads,
                   params.smtLSQThreshold)),
       dcachePort(this, cpu_ptr),
+      fedexCentralPort(this, cpu_ptr),
       numThreads(params.numThreads)
 {
     assert(numThreads > 0 && numThreads <= MaxThreads);
@@ -116,6 +121,7 @@ LSQ::LSQ(CPU *cpu_ptr, IEW *iew_ptr, const BaseO3CPUParams &params)
         thread.emplace_back(maxLQEntries, maxSQEntries);
         thread[tid].init(cpu, iew_ptr, params, this, tid);
         thread[tid].setDcachePort(&dcachePort);
+        thread[tid].setFedexCentralPort(&fedexCentralPort);
     }
 }
 
@@ -1413,6 +1419,14 @@ LSQ::DcachePort::recvTimingResp(PacketPtr pkt)
 {
     return lsq->recvTimingResp(pkt);
 }
+
+bool
+LSQ::FedexCentralPort::recvTimingResp(PacketPtr pkt)
+{
+    std::cout << "fedexCentral Returned" << std::endl;
+    return true;
+}
+
 
 void
 LSQ::DcachePort::recvTimingSnoopReq(PacketPtr pkt)

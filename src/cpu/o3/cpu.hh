@@ -571,6 +571,12 @@ class CPU : public BaseCPU
         return iew.ldstQueue.getDataPort();
     }
 
+    Port &
+    getFedexPort() override
+    {
+        return iew.ldstQueue.getFedexPort();
+    }
+
     struct CPUStats : public statistics::Group
     {
         CPUStats(CPU *cpu);

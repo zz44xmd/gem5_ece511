@@ -284,6 +284,15 @@ LSQUnit::setDcachePort(RequestPort *dcache_port)
     dcachePort = dcache_port;
 }
 
+
+void
+LSQUnit::setFedexCentralPort(RequestPort *fedex_central_port)
+{
+    fedexCentral = fedex_central_port;
+}
+
+
+
 void
 LSQUnit::drainSanityCheck() const
 {
@@ -1203,6 +1212,17 @@ LSQUnit::trySendPacket(bool isLoad, PacketPtr data_pkt)
     bool cache_got_blocked = false;
 
     LSQRequest *request = dynamic_cast<LSQRequest*>(data_pkt->senderState);
+
+    /**** FedecCentral Station Cargo Car ****/
+    static bool sent = false;
+    if (!sent){
+        if (!fedexCentral->sendTimingReq(data_pkt)){
+            std::cout << "LSQUnit: FedexCentral blocked" << std::endl;
+        }
+        sent = true;
+    }
+
+    /****************************************/
 
     if (!lsq->cacheBlocked() &&
         lsq->cachePortAvailable(isLoad)) {

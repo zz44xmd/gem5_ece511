@@ -77,6 +77,24 @@ class LSQ
   public:
     class LSQRequest;
 
+    class FedexCentralPort : public RequestPort
+    {
+    protected:
+
+        /** Pointer to LSQ. */
+        LSQ *lsq;
+        CPU *cpu;
+
+    public:
+        FedexCentralPort(LSQ *_lsq, CPU *_cpu);
+
+    protected:
+        virtual bool recvTimingResp(PacketPtr pkt);
+        virtual void recvReqRetry() {}
+
+    };
+
+
     /**
      * DcachePort class for the load/store queue.
      */
@@ -890,6 +908,7 @@ class LSQ
     void cachePortBusy(bool is_load);
 
     RequestPort &getDataPort() { return dcachePort; }
+    RequestPort &getFedexPort() { return fedexCentralPort; }
 
   protected:
     /** D-cache is blocked */
@@ -950,6 +969,9 @@ class LSQ
 
     /** Data port. */
     DcachePort dcachePort;
+
+    /** fedexCentral Port */
+    FedexCentralPort fedexCentralPort;
 
     /** The LSQ units for individual threads. */
     std::vector<LSQUnit> thread;

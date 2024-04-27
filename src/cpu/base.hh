@@ -186,6 +186,12 @@ class BaseCPU : public ClockedObject
      */
     virtual Port &getInstPort() = 0;
 
+
+    virtual Port &getFedexPort() {
+      panic("%s not implemented.", __FUNCTION__);
+    }
+
+
     /** Reads this CPU's ID. */
     int cpuId() const { return _cpuId; }
 

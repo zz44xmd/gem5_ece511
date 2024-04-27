@@ -703,6 +703,7 @@ IEW::checkStall(ThreadID tid)
     return ret_val;
 }
 
+//!Done
 void
 IEW::checkSignalsAndUpdate(ThreadID tid)
 {
@@ -897,6 +898,7 @@ IEW::dispatchInsts(ThreadID tid)
     {
         inst = insts_to_dispatch.front();
 
+        ////////////////////////////////////////////////---->>>>>
         if (dispatchStatus[tid] == Unblocking) {
             DPRINTF(IEW, "[tid:%i] Issue: Examining instruction from skid "
                     "buffer\n", tid);
@@ -908,6 +910,7 @@ IEW::dispatchInsts(ThreadID tid)
         DPRINTF(IEW, "[tid:%i] Issue: Adding PC %s [sn:%lli] [tid:%i] to "
                 "IQ.\n",
                 tid, inst->pcState(), inst->seqNum, inst->threadNumber);
+
 
         // Be sure to mark these instructions as ready so that the
         // commit stage can go ahead and execute them, and mark
@@ -983,6 +986,7 @@ IEW::dispatchInsts(ThreadID tid)
             inst->clearHtmTransactionalState();
         }
 
+        ////////////////////////////////////////////////----<<<<<<
 
         // Otherwise issue the instruction just fine.
         if (inst->isAtomic()) {
@@ -1447,6 +1451,7 @@ IEW::tick()
     std::list<ThreadID>::iterator threads = activeThreads->begin();
     std::list<ThreadID>::iterator end = activeThreads->end();
 
+    /**************************** Dispatching ****************************/
     // Check stall and squash signals, dispatch any instructions.
     while (threads != end) {
         ThreadID tid = *threads++;
@@ -1457,6 +1462,7 @@ IEW::tick()
         dispatch(tid);
     }
 
+    /***************************** Executing *****************************/
     if (exeStatus != Squashing) {
         executeInsts();
 

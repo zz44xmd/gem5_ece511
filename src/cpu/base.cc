@@ -417,6 +417,8 @@ BaseCPU::getPort(const std::string &if_name, PortID idx)
         return getDataPort();
     else if (if_name == "icache_port")
         return getInstPort();
+    else if (if_name == "to_fedex_central")
+        return getFedexPort();
     else
         return ClockedObject::getPort(if_name, idx);
 }

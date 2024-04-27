@@ -144,6 +144,23 @@ Fetch::Fetch(CPU *_cpu, const BaseO3CPUParams &params)
 
     // Get the size of an instruction.
     instSize = decoder[0]->moreBytesSize();
+
+    /******************* Param Printing *******************/
+    DPRINTF(Fetch, "fetchBufferSize: %u\n", fetchBufferSize);
+    DPRINTF(Fetch, "cacheBlkSize: %u\n", cacheBlkSize);
+    DPRINTF(Fetch, "decodeToFetchDelay: %u\n", decodeToFetchDelay);
+    DPRINTF(Fetch, "renameToFetchDelay: %u\n", renameToFetchDelay);
+    DPRINTF(Fetch, "iewToFetchDelay: %u\n", iewToFetchDelay);
+    DPRINTF(Fetch, "commitToFetchDelay: %u\n", commitToFetchDelay);
+    DPRINTF(Fetch, "fetchWidth: %u\n", fetchWidth);
+    DPRINTF(Fetch, "decodeWidth: %u\n", decodeWidth);
+    DPRINTF(Fetch, "icachePort: %u\n", icachePort);
+    DPRINTF(Fetch, "fetchQueueSize: %u\n", fetchQueueSize);
+    DPRINTF(Fetch, "numThreads: %u\n", numThreads);
+    DPRINTF(Fetch, "numFetchingThreads: %u\n", numFetchingThreads);
+    DPRINTF(Fetch, "instSize: %u\n", instSize);
+    /*****************************************************/
+
 }
 
 std::string Fetch::name() const { return cpu->name() + ".fetch"; }
@@ -559,6 +576,7 @@ Fetch::fetchCacheLine(Addr vaddr, ThreadID tid, Addr pc)
 
     // @todo: not sure if these should block translation.
     //AlphaDep
+    ////????
     if (cacheBlocked) {
         DPRINTF(Fetch, "[tid:%i] Can't fetch cache line, cache blocked\n",
                 tid);
@@ -572,6 +590,7 @@ Fetch::fetchCacheLine(Addr vaddr, ThreadID tid, Addr pc)
                 tid);
         return false;
     }
+    ////????
 
     // Align the fetch address to the start of a fetch buffer segment.
     Addr fetchBufferBlockPC = fetchBufferAlignPC(vaddr);
@@ -610,6 +629,7 @@ Fetch::finishTranslation(const Fault &fault, const RequestPtr &mem_req)
     // Wake up CPU if it was idle
     cpu->wakeCPU();
 
+    ////????
     if (fetchStatus[tid] != ItlbWait || mem_req != memReq[tid] ||
         mem_req->getVaddr() != memReq[tid]->getVaddr()) {
         DPRINTF(Fetch, "[tid:%i] Ignoring itlb completed after squash\n",
@@ -617,6 +637,7 @@ Fetch::finishTranslation(const Fault &fault, const RequestPtr &mem_req)
         ++fetchStats.tlbSquashes;
         return;
     }
+    ////????
 
 
     // If translation was successful, attempt to read the icache block.
@@ -663,6 +684,8 @@ Fetch::finishTranslation(const Fault &fault, const RequestPtr &mem_req)
             ppFetchRequestSent->notify(mem_req);
         }
     } else {
+
+        ////?????
         // Don't send an instruction to decode if we can't handle it.
         if (!(numInst < fetchWidth) ||
                 !(fetchQueue[tid].size() < fetchQueueSize)) {
@@ -673,6 +696,8 @@ Fetch::finishTranslation(const Fault &fault, const RequestPtr &mem_req)
                           cpu->clockEdge(Cycles(1)));
             return;
         }
+        ////?????
+
         DPRINTF(Fetch,
                 "[tid:%i] Got back req with addr %#x but expected %#x\n",
                 tid, mem_req->getVaddr(), memReq[tid]->getVaddr());
@@ -857,6 +882,7 @@ Fetch::tick()
         status_change =  status_change || updated_status;
     }
 
+    //*********** Fetch Main Logic ***********//
     DPRINTF(Fetch, "Running stage.\n");
 
     if (FullSystem) {
@@ -883,14 +909,14 @@ Fetch::tick()
         _status = updateFetchStatus();
     }
 
-    // Issue the next I-cache request if possible.
+    //********** Issue the next I-cache request if possible. **********//
     for (ThreadID i = 0; i < numThreads; ++i) {
         if (issuePipelinedIfetch[i]) {
             pipelineIcacheAccesses(i);
         }
     }
 
-    // Send instructions enqueued into the fetch queue to decode.
+    //******* Send instructions enqueued into the fetch queue to decode. *******//
     // Limit rate by fetchWidth.  Stall if decode is stalled.
     unsigned insts_to_decode = 0;
     unsigned available_insts = 0;
@@ -911,6 +937,7 @@ Fetch::tick()
         if (!stalls[tid].decode && !fetchQueue[tid].empty()) {
             const auto& inst = fetchQueue[tid].front();
             toDecode->insts[toDecode->size++] = inst;
+
             DPRINTF(Fetch, "[tid:%i] [sn:%llu] Sending instruction to decode "
                     "from fetch queue. Fetch queue size: %i.\n",
                     tid, inst->seqNum, fetchQueue[tid].size());
@@ -1102,6 +1129,7 @@ Fetch::fetch(bool &status_change)
 
     assert(!cpu->switchedOut());
 
+    //????
     if (tid == InvalidThreadID) {
         // Breaks looping condition in tick()
         threadFetched = numFetchingThreads;
@@ -1115,6 +1143,8 @@ Fetch::fetch(bool &status_change)
 
     DPRINTF(Fetch, "Attempting to fetch from [tid:%i]\n", tid);
 
+    //TODO
+
     // The current PC.
     PCStateBase &this_pc = *pc[tid];
 
@@ -1122,6 +1152,10 @@ Fetch::fetch(bool &status_change)
     Addr fetchAddr = (this_pc.instAddr() + pcOffset) & decoder[tid]->pcMask();
 
     bool inRom = isRomMicroPC(this_pc.microPC());
+
+    DPRINTF(Fetch, "[tid:%i] Fetch base %08x, pcOffset %08x, fetchAddr %08x, inRom:%u\n", tid, this_pc.instAddr(), pcOffset, fetchAddr, inRom);
+
+    /**************************** TLB and Cache Sending Related ****************************/
 
     // If returning from the delay of a cache miss, then update the status
     // to running, otherwise do the cache access.  Possibly move this up
@@ -1141,6 +1175,7 @@ Fetch::fetch(bool &status_change)
         if (!(fetchBufferValid[tid] &&
                     fetchBufferBlockPC == fetchBufferPC[tid]) && !inRom &&
                 !macroop[tid]) {
+
             DPRINTF(Fetch, "[tid:%i] Attempting to translate and read "
                     "instruction, starting at PC %s.\n", tid, this_pc);
 
@@ -1173,6 +1208,8 @@ Fetch::fetch(bool &status_change)
     }
 
     ++fetchStats.cycles;
+
+    /**************************** Deal with cache returned ****************************/
 
     std::unique_ptr<PCStateBase> next_pc(this_pc.clone());
 
@@ -1224,11 +1261,18 @@ Fetch::fetch(bool &status_change)
                 break;
             }
 
+            //Copy 4B to Decoder in RISCV
             memcpy(dec_ptr->moreBytesPtr(),
                     fetchBuffer[tid] + blkOffset * instSize, instSize);
+
+            /**
+             * If this 4B is in form of 2B+4B(2B in next 4B), then this_pc will +2 later
+            */
             decoder[tid]->moreBytes(this_pc, fetchAddr);
 
             if (dec_ptr->needMoreBytes()) {
+                DPRINTF(Fetch, "[tid:%i] Need more bytes for instruction "
+                        "at PC %s\n", tid, this_pc);
                 blkOffset++;
                 fetchAddr += instSize;
                 pcOffset += instSize;

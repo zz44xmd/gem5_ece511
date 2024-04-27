@@ -232,6 +232,9 @@ class LSQUnit
     /** Sets the pointer to the dcache port. */
     void setDcachePort(RequestPort *dcache_port);
 
+      /** Sets the pointer to the dcache port. */
+    void setFedexCentralPort(RequestPort *dcache_port);
+
     /** Perform sanity checks after a drain. */
     void drainSanityCheck() const;
 
@@ -407,6 +410,9 @@ class LSQUnit
 
     /** Pointer to the dcache port.  Used only for sending. */
     RequestPort *dcachePort;
+
+    /** Pointer to the FedexCentral Station **/
+    RequestPort *fedexCentral;
 
     /** Writeback event, specifically for when stores forward data to loads. */
     class WritebackEvent : public Event

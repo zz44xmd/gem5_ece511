@@ -142,6 +142,8 @@ class BaseCPU(ClockedObject):
 
     icache_port = RequestPort("Instruction Port")
     dcache_port = RequestPort("Data Port")
+    to_fedex_central = RequestPort("Fedex Central Port")
+
     _cached_ports = ['icache_port', 'dcache_port']
 
     _uncached_interrupt_response_ports = []

@@ -71,6 +71,7 @@ class BasicDecodeCache
         }
 
         entry.inst = decoder->decodeInst(mach_inst);
+        printf("Generic ISA Working\n");
         instMap[mach_inst] = entry.inst;
         return entry.inst;
     }
