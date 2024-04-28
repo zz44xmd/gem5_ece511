@@ -969,6 +969,7 @@ decode QUADRANT default Unknown::unknown() {
                     0x5: max({{
                         Rd = (((int64_t) Rs1) > ((int64_t) Rs2)) ? Rs1 : Rs2;
                     }});
+                    0x6: memcpy();
                     0x10: sh3add({{
                         Rd = (Rs1 << 3) + Rs2;
                     }});
