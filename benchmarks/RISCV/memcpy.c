@@ -3,8 +3,8 @@
 
 #define MEMCPY_SRC "Hello, RISC-V!"
 
-#define MEMCPY(dest, src, len) \
-    asm volatile ("memcpy %0, %1, %2, %3" : "=r" (dest) : "r" (dest), "r" (src), "r" (len));
+#define MEMCPY(src, dest, len) \
+    asm volatile ("memcpy %0, %1, %2" : : "r" (src), "r" (dest), "r" (len));
 
 int main() {
     volatile char src[] = MEMCPY_SRC;
@@ -16,7 +16,7 @@ int main() {
     char *src_ptr = (char*)src;
     char *dest_ptr = (char*)dest;
 
-    MEMCPY(dest_ptr, src_ptr, len);
+    MEMCPY(src_ptr, dest_ptr, len);
     
     if (memcmp((const void*)src_ptr, (const void*)dest_ptr, len) != 0) {
         printf("[[FAILED]]\n");
