@@ -4,7 +4,7 @@
 #define MEMCPY_SRC "Hello, RISC-V!"
 
 #define MEMCPY(dest, src, len) \
-    asm volatile ("memcpy %0, %1, %2" : "=r" (dest) : "r" (src), "r" (len))
+    asm volatile ("memcpy %0, %1, %2, %3" : "=r" (dest) : "r" (dest), "r" (src), "r" (len));
 
 int main() {
     volatile char src[] = MEMCPY_SRC;
