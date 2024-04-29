@@ -9,6 +9,10 @@
 #include "params/FedexCentral.hh"
 #include "sim/clocked_object.hh"
 
+
+
+#include <queue>
+
 namespace gem5
 {
 
@@ -26,8 +30,40 @@ protected:
     bool processReadBack(PacketPtr pkt);
     bool processWriteBack(PacketPtr pkt);
 
-// private:
+    void tick();
+    void sendToReadTranslate();
+    void sendToWriteTranslate();
+    bool updateWriteBuffer(PacketPtr pkt);
+    void sendWriteBuffer();
 
+    void retryFailedRead();
+    void retryFailedWrite();
+
+    EventFunctionWrapper tickEvent;
+
+private:
+    //** General Control
+    bool valid;
+    Tick lastMemReqTick;
+
+    //** Fedex Command Buffer
+    Addr pc;
+    Addr srcAddr;
+    Addr dstAddr;
+    uint64_t sizeByte;
+
+    Addr curSrcAddr;
+    Addr curDstAddr;
+    uint64_t remainSizeByte;
+
+    //** Fedex Read Buffer
+    std::queue<RequestPtr> readBuffer;
+    std::queue<RequestPtr> writeBuffer;
+    std::queue<PacketPtr> retryReadBuffer;
+    std::queue<PacketPtr> retryWriteBuffer;
+
+    unsigned readBufferEntriesCount;
+    unsigned writeBufferEntriesCount;
 
 /****************************************************************************/
 /************************** Connection With O3 CPU **************************/
@@ -56,13 +92,12 @@ protected:
         virtual AddrRangeList getAddrRanges() const override {return AddrRangeList();}
     };
 
+    BaseCPU* cpu;
     FedexCentralCmdRecv o3RequestPort;
 
     /**************************************************************************/
     /************************* Connection With Memory *************************/
     /**************************************************************************/
-
-
 
     class FedexDataPort : public RequestPort
     {
@@ -76,22 +111,27 @@ protected:
             virtual bool recvTimingResp(PacketPtr pkt) override {
 
                 std::cout << "Received pkt from Memory" << std::endl;
-
-                // if (pkt->isRead())
-                //     return fc->processReadBack(pkt);
-                // else if (pkt->isWrite())
-                //     return fc->processWriteBack(pkt);
-                // else{
-                //     std::cout << "Received a packet that is not a read or write" << std::endl;
-                //     return true;
-                // }
+                fc->updateWriteBuffer(pkt);
                 return true;
             }
             virtual void recvReqRetry() override {}
-
     };
 
+public:
+    void sendToMemory(const RequestPtr&, uint8_t*, uint64_t*, bool);
+    void finishTranslation(WholeTranslationState *);
+    bool isSquashed();
+
+protected:
+    /** Reads this CPU's unique data requestor ID */
+    RequestorID dataRequestorId() const { return _dataRequestorId; }
+
+
+private:
+    BaseMMU *mmu; 
     FedexDataPort dataPort;
+    unsigned int cacheLineSize;
+    RequestorID _dataRequestorId;
 };
 
 } // namespace gem5

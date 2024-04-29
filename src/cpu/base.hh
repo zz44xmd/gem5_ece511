@@ -265,9 +265,9 @@ class BaseCPU : public ClockedObject
         return FullSystem && interrupts[tid]->checkInterrupts();
     }
 
-  protected:
+  public:
     std::vector<ThreadContext *> threadContexts;
-
+  protected:
     Trace::InstTracer * tracer;
 
   public:

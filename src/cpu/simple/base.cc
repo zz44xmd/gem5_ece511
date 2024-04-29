@@ -90,6 +90,14 @@ BaseSimpleCPU::BaseSimpleCPU(const BaseSimpleCPUParams &p)
 {
     SimpleThread *thread;
 
+    if (p.mmu){
+        std::cout << "I have MMU xD" << std::endl;
+    }
+
+    if (p.checker) {
+        std::cout << "I have CPU xD" << std::endl;
+    }
+
     for (unsigned i = 0; i < numThreads; i++) {
         if (FullSystem) {
             thread = new SimpleThread(

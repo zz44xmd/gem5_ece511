@@ -25,7 +25,15 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from m5.params import *
+from m5.SimObject import *
+from m5.proxy import *
+from m5.util.fdthelper import *
+
 from m5.objects.ClockedObject import ClockedObject
+
+
+
+
 
 class FedexCentral(ClockedObject):
     type = 'FedexCentral'
@@ -36,6 +44,15 @@ class FedexCentral(ClockedObject):
     def memory_mode(cls):
         return 'timing'
 
+    ######### Ports ###########
     o3RequestPort = ResponsePort("O3 Request Port")
     dataPort = RequestPort("Data Port")
 
+    ####### Parameters ########
+    system = Param.System(Parent.any, "system object")
+    mmu = Param.BaseMMU(NULL, "CPU memory management unit")
+    baseCPU = Param.BaseCPU(NULL, "checker CPU")
+
+
+    readBufferEntries = Param.Unsigned(20, "readBufferEntries Count")
+    writeBufferEntries = Param.Unsigned(20, "writeBufferEntries Count")

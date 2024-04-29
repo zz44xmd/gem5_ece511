@@ -139,6 +139,7 @@ system.mem_ranges = [AddrRange('512MB')]
 system.cache_line_size = 64
 
 system.cpu = RiscvO3CPU(cpu_id = 0)
+# system.cpu = RiscvTimingSimpleCPU(cpu_id = 0)
 system.acc = FedexCentral()
 # system.cpu = [RiscvO3CPU(cpu_id = 0), RiscvTimingSimpleCPU(cpu_id = 1)]
 
@@ -196,6 +197,9 @@ config_filesystem(system, args)
 ########################################################### Fedex Connection
 system.acc.o3RequestPort = system.cpu.to_fedex_central
 system.tol2bus.cpu_side_ports = system.acc.dataPort
+system.acc.mmu = system.cpu.mmu
+system.acc.baseCPU = system.cpu
+
 
 ########################################################### Run Simulation
 system.workload = SEWorkload.init_compatible(program)

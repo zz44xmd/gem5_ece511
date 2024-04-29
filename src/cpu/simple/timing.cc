@@ -466,6 +466,9 @@ TimingSimpleCPU::initiateMemRead(Addr addr, unsigned size,
 
     RequestPtr req = std::make_shared<Request>(
         addr, size, flags, dataRequestorId(), pc, thread->contextId());
+
+    // std::cout << "Timing Data RequestorID() is " << dataRequestorId() << std::endl;
+
     req->setByteEnable(byte_enable);
 
     req->taskId(taskId());

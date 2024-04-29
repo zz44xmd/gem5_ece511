@@ -143,6 +143,8 @@ CPU::CPU(const BaseO3CPUParams &params)
         tids.resize(numThreads);
     }
 
+    std::cout << "[CPU] DataRequestor ID is " << dataRequestorId() << std::endl;
+
     // The stages also need their CPU pointer setup.  However this
     // must be done at the upper level CPU because they have pointers
     // to the upper level CPU, and not this CPU.
