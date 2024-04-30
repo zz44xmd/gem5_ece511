@@ -54,6 +54,7 @@ def operands {{
     'Rd': IntReg('ud', 'RD', 'IsInteger', 1),
     'Rs1': IntReg('ud', 'RS1', 'IsInteger', 2),
     'Rs2': IntReg('ud', 'RS2', 'IsInteger', 3),
+    'Rs3': IntReg('ud', 'RS3', 'IsInteger', 4),
     'Rt': IntReg('ud', 'AMOTempReg', 'IsInteger', 4),
     'Rc1': IntReg('ud', 'RC1', 'IsInteger', 2),
     'Rc2': IntReg('ud', 'RC2', 'IsInteger', 3),
@@ -81,6 +82,7 @@ def operands {{
 
 #Memory Operand
     'Mem': MemOp('ud', None, (None, 'IsLoad', 'IsStore'), 5),
+    'FedexMem': MemOp('ud', None, 'IsFedex', 5),
 
 #Program Counter Operands
     'PC': PCStateOp('ud', 'pc', (None, None, 'IsControl'), 7),

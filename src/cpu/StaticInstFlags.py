@@ -59,6 +59,7 @@ class StaticInstFlags(Enum):
         'IsStoreConditional',   # Store conditional instruction.
         'IsInstPrefetch',   # Instruction-cache prefetch.
         'IsDataPrefetch',   # Data-cache prefetch.
+        'IsFedex',          # Is a fedex instruction
 
         'IsControl',        # Control transfer instruction.
         'IsDirectControl',  # PC relative control transfer.

@@ -53,6 +53,15 @@ class MemInst : public RiscvStaticInst
     {}
 };
 
+class Fedex : public MemInst
+{
+  protected:
+    using MemInst::MemInst;
+
+    std::string generateDisassembly(
+        Addr pc, const loader::SymbolTable *symtab) const override;
+};
+
 class Load : public MemInst
 {
   protected:

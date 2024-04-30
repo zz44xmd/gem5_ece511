@@ -1214,13 +1214,13 @@ LSQUnit::trySendPacket(bool isLoad, PacketPtr data_pkt)
     LSQRequest *request = dynamic_cast<LSQRequest*>(data_pkt->senderState);
 
     /**** FedecCentral Station Cargo Car ****/
-    static bool sent = false;
-    if (!sent){
-        if (!fedexCentral->sendTimingReq(data_pkt)){
-            std::cout << "LSQUnit: FedexCentral blocked" << std::endl;
-        }
-        sent = true;
-    }
+    // static bool sent = false;
+    // if (!sent){
+    //     if (!fedexCentral->sendTimingReq(data_pkt)){
+    //         std::cout << "LSQUnit: FedexCentral blocked" << std::endl;
+    //     }
+    //     sent = true;
+    // }
 
     /****************************************/
 

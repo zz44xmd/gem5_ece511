@@ -44,6 +44,15 @@ namespace RiscvISA
 {
 
 std::string
+Fedex::generateDisassembly(Addr pc, const loader::SymbolTable *symtab) const
+{
+    std::stringstream ss;
+    ss << "Fedex Instruction";
+    return ss.str();
+}
+
+
+std::string
 Load::generateDisassembly(Addr pc, const loader::SymbolTable *symtab) const
 {
     std::stringstream ss;

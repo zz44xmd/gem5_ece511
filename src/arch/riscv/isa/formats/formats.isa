@@ -45,3 +45,6 @@
 
 // Include the unknown
 ##include "unknown.isa"
+
+// Include the Fedex
+##include "fedex.isa"

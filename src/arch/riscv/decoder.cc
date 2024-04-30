@@ -90,6 +90,7 @@ Decoder::decode(ExtMachInst mach_inst, Addr addr)
     if (!si)
         si = decodeInst(mach_inst);
 
+
     DPRINTF(Decode, "Decode: Decoded %s instruction: %#x\n",
             si->getName(), mach_inst);
     return si;

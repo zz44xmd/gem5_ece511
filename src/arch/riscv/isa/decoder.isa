@@ -430,6 +430,26 @@ decode QUADRANT default Unknown::unknown() {
             }
         }
 
+        0x02: Fedex::FedexMemcpy({{
+            Addr EAsrc = Rs1;
+            Addr EAdst = Rs2;
+            uint64_t size = Rs3;
+
+            uint8_t FedexMem = {};
+
+            for (int i = 0; i < size; i++) {
+                Fault fault =
+                    readMemAtomicLE(xc, traceData, EAsrc + i, FedexMem, memAccessFlags);
+                if (fault != NoFault)
+                    return fault;
+
+                fault =
+                    writeMemAtomicLE(xc, traceData, FedexMem, EAdst + i, memAccessFlags, nullptr);
+                if (fault != NoFault)
+                    return fault;
+            }            
+        }});
+
         0x03: decode FUNCT3 {
             format FenceOp {
                 0x0: fence({{
@@ -969,7 +989,6 @@ decode QUADRANT default Unknown::unknown() {
                     0x5: max({{
                         Rd = (((int64_t) Rs1) > ((int64_t) Rs2)) ? Rs1 : Rs2;
                     }});
-                    0x6: memcpy();
                     0x10: sh3add({{
                         Rd = (Rs1 << 3) + Rs2;
                     }});
