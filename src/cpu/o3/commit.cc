@@ -1152,7 +1152,7 @@ Commit::commitHead(const DynInstPtr &head_inst, unsigned inst_num)
     if (!head_inst->isExecuted()) {
         // Make sure we are only trying to commit un-executed instructions we
         // think are possible.
-        assert(head_inst->isNonSpeculative() || head_inst->isStoreConditional()
+        assert(head_inst->isNonSpeculative() || head_inst->isStoreConditional() || head_inst->isFedex()
                || head_inst->isReadBarrier() || head_inst->isWriteBarrier()
                || head_inst->isAtomic()
                || (head_inst->isLoad() && head_inst->strictlyOrdered()));
@@ -1211,7 +1211,7 @@ Commit::commitHead(const DynInstPtr &head_inst, unsigned inst_num)
     }
 
     // Stores mark themselves as completed.
-    if (!head_inst->isStore() && inst_fault == NoFault) {
+    if (!head_inst->isStore() &&!head_inst->isFedex() && inst_fault == NoFault) {
         head_inst->setCompleted();
     }
 
@@ -1319,7 +1319,7 @@ Commit::commitHead(const DynInstPtr &head_inst, unsigned inst_num)
 #endif
 
     // If this was a store, record it for this cycle.
-    if (head_inst->isStore() || head_inst->isAtomic())
+    if (head_inst->isStore() || head_inst->isAtomic() || head_inst->isFedex())
         committedStores[tid] = true;
 
     // Return true to indicate that we have committed an instruction.

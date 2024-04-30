@@ -892,6 +892,9 @@ class LSQ
                       uint64_t *res, AtomicOpFunctorPtr amo_op,
                       const std::vector<bool>& byte_enable);
 
+    Fault pushFedexRequest(const DynInstPtr& inst, Addr addrSrc, Addr addrDest, unsigned int size,
+                        Request::Flags flags, uint64_t *res);
+
     /** The CPU pointer. */
     CPU *cpu;
 

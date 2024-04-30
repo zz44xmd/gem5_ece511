@@ -66,15 +66,19 @@ bool FedexCentral::processCmd(PacketPtr pkt){
     std::cout << "Processing Command xD" << std::endl;
 
     if (valid){
-        std::cout << "Still processing previous Fedex Command" << std::endl;
-        return false;
+        panic("Still processing previous Fedex Command"); 
     }
 
     //** Testing Beta Part *******************************
-    RequestPtr req = pkt->req;
-    Addr srcAddr = req->getVaddr();
-    Addr dstAddr = req->getPaddr();
-    uint64_t sizeByte = req->getSize();
+    uint64_t* data = pkt->getPtr<uint64_t>();
+    Addr addrSrc = data[0];
+    Addr addrDest = data[1];
+    uint64_t sizeByte = data[2];
+
+    std::cout << "FedexCentral Received addrSrc: " << std::hex << addrSrc << std::endl;
+    std::cout << "FedexCentral Received addrDest: " << std::hex << addrDest << std::endl;
+    std::cout << "FedexCentral Received sizeByte: " << std::dec << sizeByte << std::endl;
+
     // valid = true;
     //****************************************************
 

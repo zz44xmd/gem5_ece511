@@ -616,7 +616,7 @@ Rename::renameInsts(ThreadID tid)
             }
         }
 
-        if (inst->isStore() || inst->isAtomic()) {
+        if (inst->isStore() || inst->isAtomic() || inst->isFedex()) {
             if (calcFreeSQEntries(tid) <= 0) {
                 DPRINTF(Rename, "[tid:%i] Cannot rename due to no free SQ\n",
                         tid);
@@ -711,7 +711,7 @@ Rename::renameInsts(ThreadID tid)
 
         renameDestRegs(inst, inst->threadNumber);
 
-        if (inst->isAtomic() || inst->isStore()) {
+        if (inst->isAtomic() || inst->isStore() || inst->isFedex()) {
             storesInProgress[tid]++;
         } else if (inst->isLoad()) {
             loadsInProgress[tid]++;

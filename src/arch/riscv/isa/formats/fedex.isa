@@ -86,8 +86,18 @@ def template FedexMemcpyInitiateAcc {{
     %(class_name)s::initiateAcc(ExecContext *xc,
         Trace::InstRecord *traceData) const
     {
-        //** All things are handled by FedexCentral
-        return NoFault;
+        uint64_t Rs1 = 0;
+        uint64_t Rs2 = 0;
+        uint64_t Rs3 = 0;
+
+        Rs1 = xc->getRegOperand(this, 0);
+        Rs2 = xc->getRegOperand(this, 1);
+        Rs3 = xc->getRegOperand(this, 2);
+
+        {
+            %(init_code)s;
+        }
+
     }
 }};
 
@@ -97,17 +107,18 @@ def template FedexMemcpyCompleteAcc {{
         Trace::InstRecord *traceData) const
     {
         //** All things are handled by FedexCentral
+        std::cout << "FedexMemcpyCompleteAcc\n" << std::endl;
         return NoFault;
     }
 }};
 
 
 let {{
-def FedexBase(name, Name, base_class, code, decode_template=BasicDecode,
+def FedexBase(name, Name, base_class, code, init_code, decode_template=BasicDecode,
     exec_template_base=''):
 
     inst_flags = []
-    iop = InstObjParams(name, Name, base_class, {'code': code}, inst_flags)
+    iop = InstObjParams(name, Name, base_class, {'code': code, 'init_code': init_code}, inst_flags)
 
     # select templates
     fullExecTemplate = eval(exec_template_base + 'Execute')
@@ -122,9 +133,9 @@ def FedexBase(name, Name, base_class, code, decode_template=BasicDecode,
     return (header_output, decoder_output, decode_block, exec_output)  
 }};
 
-def format Fedex(code){{
+def format Fedex(code, init_code){{
 
     (header_output, decoder_output, decode_block, exec_output) = \
-        FedexBase(name, Name, 'Fedex', code, exec_template_base='FedexMemcpy')
+        FedexBase(name, Name, 'Fedex', code, init_code, exec_template_base='FedexMemcpy')
 
 }};

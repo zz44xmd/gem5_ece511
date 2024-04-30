@@ -142,7 +142,7 @@ class StaticInst : public RefCounted, public StaticInstFlags
     bool
     isMemRef() const
     {
-        return flags[IsLoad] || flags[IsStore] || flags[IsAtomic];
+        return flags[IsLoad] || flags[IsStore] || flags[IsAtomic] || flags[IsFedex];
     }
     bool isFedex()        const { return flags[IsFedex];}
     bool isLoad()         const { return flags[IsLoad]; }

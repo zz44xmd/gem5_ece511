@@ -18,6 +18,12 @@ int main() {
 
     MEMCPY(src_ptr, dest_ptr, len);
     
+    /******* Some Other calculations *******/
+    //!TODO
+    //Also the MEMCPY_SRC is TOOOOOOO Small to show the benefit
+    /***************************************/
+
+
     if (memcmp((const void*)src_ptr, (const void*)dest_ptr, len) != 0) {
         printf("[[FAILED]]\n");
         return -1;

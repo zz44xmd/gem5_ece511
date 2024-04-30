@@ -557,6 +557,12 @@ class CPU : public BaseCPU
                 flags, res, std::move(amo_op), byte_enable);
     }
 
+    Fault
+    pushFedexRequest(const DynInstPtr& inst, Addr addrSrc, Addr addrDest, unsigned int size,
+                    Request::Flags flags, uint64_t *res){
+        return iew.ldstQueue.pushFedexRequest(inst, addrSrc, addrDest, size, flags, res);
+    }
+
     /** Used by the fetch unit to get a hold of the instruction port. */
     Port &
     getInstPort() override

@@ -213,7 +213,7 @@ MemDepUnit::insert(const DynInstPtr &inst)
         producing_stores.insert(std::end(producing_stores),
                                 std::begin(loadBarrierSNs),
                                 std::end(loadBarrierSNs));
-    } else if ((inst->isStore() || inst->isAtomic()) && hasStoreBarrier()) {
+    } else if ((inst->isStore() || inst->isAtomic() || inst->isFedex()) && hasStoreBarrier()) {
         DPRINTF(MemDepUnit, "%d store barriers in flight\n",
                 storeBarrierSNs.size());
         producing_stores.insert(std::end(producing_stores),
@@ -282,8 +282,8 @@ MemDepUnit::insert(const DynInstPtr &inst)
     // for load-acquire store-release that could also be a barrier
     insertBarrierSN(inst);
 
-    if (inst->isStore() || inst->isAtomic()) {
-        DPRINTF(MemDepUnit, "Inserting store/atomic PC %s [sn:%lli].\n",
+    if (inst->isStore() || inst->isAtomic() || inst->isFedex()) {
+        DPRINTF(MemDepUnit, "Inserting store/atomic/fedexMemcpy PC %s [sn:%lli].\n",
                 inst->pcState(), inst->seqNum);
 
         depPred.insertStore(inst->pcState().instAddr(), inst->seqNum,
@@ -304,8 +304,8 @@ MemDepUnit::insertNonSpec(const DynInstPtr &inst)
 
     // Might want to turn this part into an inline function or something.
     // It's shared between both insert functions.
-    if (inst->isStore() || inst->isAtomic()) {
-        DPRINTF(MemDepUnit, "Inserting store/atomic PC %s [sn:%lli].\n",
+    if (inst->isStore() || inst->isAtomic() || inst->isFedex()) {
+        DPRINTF(MemDepUnit, "Inserting store/atomic/FedexMemcpy PC %s [sn:%lli].\n",
                 inst->pcState(), inst->seqNum);
 
         depPred.insertStore(inst->pcState().instAddr(), inst->seqNum,
@@ -459,7 +459,7 @@ void
 MemDepUnit::wakeDependents(const DynInstPtr &inst)
 {
     // Only stores, atomics and barriers have dependents.
-    if (!inst->isStore() && !inst->isAtomic() && !inst->isReadBarrier() &&
+    if (!inst->isStore() && !inst->isFedex() && !inst->isAtomic() && !inst->isReadBarrier() &&
         !inst->isWriteBarrier() && !inst->isHtmCmd()) {
         return;
     }
@@ -585,7 +585,7 @@ MemDepUnit::issue(const DynInstPtr &inst)
     DPRINTF(MemDepUnit, "Issuing instruction PC %#x [sn:%lli].\n",
             inst->pcState().instAddr(), inst->seqNum);
 
-    depPred.issued(inst->pcState().instAddr(), inst->seqNum, inst->isStore());
+    depPred.issued(inst->pcState().instAddr(), inst->seqNum, (inst->isStore() || inst->isFedex()));
 }
 
 MemDepUnit::MemDepEntryPtr &

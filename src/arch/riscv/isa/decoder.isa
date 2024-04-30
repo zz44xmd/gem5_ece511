@@ -448,6 +448,20 @@ decode QUADRANT default Unknown::unknown() {
                 if (fault != NoFault)
                     return fault;
             }            
+        }}, {{
+
+            Addr EAsrc = Rs1;
+            Addr EAdst = Rs2;
+            uint64_t size = Rs3;
+
+            std::cout << "FedexMemcpyInitiateAcc\n" << std::endl;
+
+            Fault fault = writeFedexMemcpyTiming(xc, EAsrc, EAdst, size,
+                memAccessFlags, nullptr);
+            if (fault != NoFault)
+                return fault;            
+
+            return NoFault;
         }});
 
         0x03: decode FUNCT3 {

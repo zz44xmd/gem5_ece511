@@ -160,6 +160,13 @@ class ExecContext
                            Request::Flags flags, uint64_t *res,
                            const std::vector<bool>& byte_enable) = 0;
 
+
+    virtual Fault writeFedexMemcpy(Addr addr_src, Addr addr_dest, std::size_t size,
+                           Request::Flags flags, uint64_t *res){
+                panic("writeFedexMemcpy not implemented\n");                        
+        };
+
+
     /**
      * For atomic-mode contexts, perform an atomic AMO (a.k.a., Atomic
      * Read-Modify-Write Memory Operation)

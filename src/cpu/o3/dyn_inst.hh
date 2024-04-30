@@ -403,6 +403,9 @@ class DynInst : public ExecContext, public RefCounted
                    Request::Flags flags, uint64_t *res,
                    const std::vector<bool> &byte_enable) override;
 
+    Fault writeFedexMemcpy(Addr addr_src, Addr addr_dest, std::size_t size,
+                           Request::Flags flags, uint64_t *res) override;
+
     Fault initiateMemAMO(Addr addr, unsigned size, Request::Flags flags,
                          AtomicOpFunctorPtr amo_op) override;
 
@@ -536,8 +539,10 @@ class DynInst : public ExecContext, public RefCounted
     //
     //  Instruction types.  Forward checks to StaticInst object.
     //
+
     bool isNop()          const { return staticInst->isNop(); }
     bool isMemRef()       const { return staticInst->isMemRef(); }
+    bool isFedex()        const { return staticInst->isFedex();}
     bool isLoad()         const { return staticInst->isLoad(); }
     bool isStore()        const { return staticInst->isStore(); }
     bool isAtomic()       const { return staticInst->isAtomic(); }

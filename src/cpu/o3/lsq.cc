@@ -873,6 +873,29 @@ LSQ::pushRequest(const DynInstPtr& inst, bool isLoad, uint8_t *data,
     return inst->getFault();
 }
 
+
+Fault
+LSQ::pushFedexRequest(const DynInstPtr& inst, Addr addrSrc, Addr addrDest, unsigned int size,
+                    Request::Flags flags, uint64_t *res){
+
+    //** Create Fedex Request based instruction. Sending to Fedex Central Station
+    Request::Flags flag;
+    RequestPtr req = std::make_shared<Request>(0, 3*sizeof(uint64_t), flag, RequestorID()); 
+    PacketPtr pkt = Packet::createRead(req);
+
+    uint64_t* data = new uint64_t[3];
+    data[0] = addrSrc;
+    data[1] = addrDest;
+    data[2] = size;
+
+    pkt->dataDynamic<uint64_t>(data);
+    if (!fedexCentralPort.sendTimingReq(pkt)){
+        panic("fedexCentralPort should never be blocked");
+    }
+
+    return NoFault;
+}
+
 void
 LSQ::SingleDataRequest::finish(const Fault &fault, const RequestPtr &request,
         gem5::ThreadContext* tc, BaseMMU::Mode mode)

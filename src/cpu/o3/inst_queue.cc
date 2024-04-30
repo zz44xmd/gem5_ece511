@@ -1221,13 +1221,13 @@ InstructionQueue::doSquash(ThreadID tid)
 
             bool is_acq_rel = squashed_inst->isFullMemBarrier() &&
                          (squashed_inst->isLoad() ||
-                          (squashed_inst->isStore() &&
-                             !squashed_inst->isStoreConditional()));
+                          (squashed_inst->isStore() && !squashed_inst->isStoreConditional() && !squashed_inst->isFedex()));
 
             // Remove the instruction from the dependency list.
             if (is_acq_rel ||
                 (!squashed_inst->isNonSpeculative() &&
                  !squashed_inst->isStoreConditional() &&
+                 !squashed_inst->isFedex() &&
                  !squashed_inst->isAtomic() &&
                  !squashed_inst->isReadBarrier() &&
                  !squashed_inst->isWriteBarrier())) {

@@ -432,6 +432,16 @@ DynInst::writeMem(uint8_t *data, unsigned size, Addr addr,
 }
 
 Fault
+DynInst::writeFedexMemcpy(Addr addr_src, Addr addr_dest, std::size_t size,
+                           Request::Flags flags, uint64_t *res)
+{
+    return cpu->pushFedexRequest(
+        dynamic_cast<DynInstPtr::PtrType>(this),
+        addr_src, addr_dest, size, flags, res);
+}
+
+
+Fault
 DynInst::initiateMemAMO(Addr addr, unsigned size, Request::Flags flags,
                               AtomicOpFunctorPtr amo_op)
 {

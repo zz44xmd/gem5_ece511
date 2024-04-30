@@ -178,11 +178,11 @@ LSQUnit::completeDataAccess(PacketPtr pkt)
             }
 
             writeback(inst, request->mainPacket());
-            if (inst->isStore() || inst->isAtomic()) {
+            if (inst->isStore() || inst->isAtomic() || inst->isFedex()) {
                 request->writebackDone();
                 completeStore(request->instruction()->sqIt);
             }
-        } else if (inst->isStore()) {
+        } else if (inst->isStore() || inst->isFedex()) {
             // This is a regular store (i.e., not store conditionals and
             // atomics), so it can complete without writing back
             completeStore(request->instruction()->sqIt);
@@ -314,7 +314,7 @@ LSQUnit::insert(const DynInstPtr &inst)
 {
     assert(inst->isMemRef());
 
-    assert(inst->isLoad() || inst->isStore() || inst->isAtomic());
+    assert(inst->isLoad() || inst->isStore() || inst->isAtomic() || inst->isFedex());
 
     if (inst->isLoad()) {
         insertLoad(inst);
@@ -1087,7 +1087,7 @@ LSQUnit::writeback(const DynInstPtr &inst, PacketPtr pkt)
 
     // Squashed instructions do not need to complete their access.
     if (inst->isSquashed()) {
-        assert (!inst->isStore() || inst->isStoreConditional());
+        assert (!inst->isFedex() || !inst->isStore() || inst->isStoreConditional());
         ++stats.ignoredResponses;
         return;
     }

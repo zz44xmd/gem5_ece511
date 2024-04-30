@@ -438,7 +438,8 @@ IEW::squash(ThreadID tid)
             toRename->iewInfo[tid].dispatchedToLQ++;
         }
         if (skidBuffer[tid].front()->isStore() ||
-            skidBuffer[tid].front()->isAtomic()) {
+            skidBuffer[tid].front()->isAtomic() ||
+            skidBuffer[tid].front()->isFedex()) {
             toRename->iewInfo[tid].dispatchedToSQ++;
         }
 
@@ -791,7 +792,8 @@ IEW::emptyRenameInsts(ThreadID tid)
             toRename->iewInfo[tid].dispatchedToLQ++;
         }
         if (insts[tid].front()->isStore() ||
-            insts[tid].front()->isAtomic()) {
+            insts[tid].front()->isAtomic() ||
+            insts[tid].front()->isFedex()) {
             toRename->iewInfo[tid].dispatchedToSQ++;
         }
 
@@ -929,7 +931,7 @@ IEW::dispatchInsts(ThreadID tid)
             if (inst->isLoad()) {
                 toRename->iewInfo[tid].dispatchedToLQ++;
             }
-            if (inst->isStore() || inst->isAtomic()) {
+            if (inst->isStore() || inst->isAtomic() || inst->isFedex()) {
                 toRename->iewInfo[tid].dispatchedToSQ++;
             }
 
@@ -957,9 +959,10 @@ IEW::dispatchInsts(ThreadID tid)
         // Check LSQ if inst is LD/ST
         if ((inst->isAtomic() && ldstQueue.sqFull(tid)) ||
             (inst->isLoad() && ldstQueue.lqFull(tid)) ||
-            (inst->isStore() && ldstQueue.sqFull(tid))) {
+            (inst->isStore() && ldstQueue.sqFull(tid)) ||
+            (inst->isFedex() && ldstQueue.sqFull(tid))) {
             DPRINTF(IEW, "[tid:%i] Issue: %s has become full.\n",tid,
-                    inst->isLoad() ? "LQ" : "SQ");
+                    inst->isLoad() ? "LQ" : (inst->isFedex() ? "FedexSQ" : "SQ"));
 
             // Call function to start blocking.
             block(tid);
@@ -1020,7 +1023,7 @@ IEW::dispatchInsts(ThreadID tid)
             add_to_iq = true;
 
             toRename->iewInfo[tid].dispatchedToLQ++;
-        } else if (inst->isStore()) {
+        } else if (inst->isStore() || inst->isFedex()) {
             DPRINTF(IEW, "[tid:%i] Issue: Memory instruction "
                     "encountered, adding to LSQ.\n", tid);
 
@@ -1028,7 +1031,7 @@ IEW::dispatchInsts(ThreadID tid)
 
             ++iewStats.dispStoreInsts;
 
-            if (inst->isStoreConditional()) {
+            if (inst->isStoreConditional() || inst->isFedex()) {
                 // Store conditionals need to be set as "canCommit()"
                 // so that commit can process them when they reach the
                 // head of commit.
@@ -1231,7 +1234,7 @@ IEW::executeInsts()
                 if (inst->isDataPrefetch() || inst->isInstPrefetch()) {
                     inst->fault = NoFault;
                 }
-            } else if (inst->isStore()) {
+            } else if (inst->isStore() || inst->isFedex()) {
                 fault = ldstQueue.executeStore(inst);
 
                 if (inst->isTranslationDelayed() &&
@@ -1495,6 +1498,7 @@ IEW::tick()
     // nonspeculative instruction.
     // This is pretty inefficient...
 
+    /**************************** Commiting ****************************/
     threads = activeThreads->begin();
     while (threads != end) {
         ThreadID tid = (*threads++);

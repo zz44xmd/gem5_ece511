@@ -141,6 +141,18 @@ readMemAtomicBE(XC *xc, Trace::InstRecord *traceData, Addr addr, MemT &mem,
     return readMemAtomic<ByteOrder::big>(xc, traceData, addr, mem, flags);
 }
 
+
+/// Write to memory in timing mode.
+template <class XC>
+Fault
+writeFedexMemcpyTiming(XC *xc, Addr addrSrc, Addr addrDest,
+                       std::size_t size, Request::Flags flags,
+                       uint64_t *res)
+{
+    return xc->writeFedexMemcpy(addrSrc, addrDest, size, flags, res);
+}
+
+
 /// Write to memory in timing mode.
 template <class XC>
 Fault
@@ -285,5 +297,8 @@ initiateMemAMO(XC *xc, Trace::InstRecord *traceData, Addr addr, MemT& mem,
 }
 
 } // namespace gem5
+
+
+
 
 #endif
