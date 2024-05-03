@@ -194,8 +194,19 @@ void FedexCentral::sendToWriteTranslate(){
 }
 
 bool FedexCentral::updateWriteBuffer(PacketPtr pkt){
-    
     //!TODO
+    std::cout << "Received packet from memory:" << std::endl;
+    std::cout << "Command: " << pkt->cmdString() << std::endl;
+    std::cout << "Address: 0x" << std::hex << pkt->getAddr() << std::dec << std::endl;
+    std::cout << "Size: " << pkt->getSize() << " bytes" << std::endl;
+
+    uint8_t* data = pkt->getPtr<uint8_t>();
+    std::cout << "Data: ";
+    for (unsigned i = 0; i < pkt->getSize(); i++) {
+        std::cout << std::hex << static_cast<uint32_t>(data[i]) << " ";
+    }
+    std::cout << std::dec << std::endl;
+
     return true;
 }
 
@@ -212,6 +223,7 @@ void FedexCentral::sendToMemory(const RequestPtr &req, uint8_t *data, uint64_t *
     std::cout << "Send to Memory xD" << std::endl;
 
     PacketPtr pkt = read ? Packet::createRead(req) : Packet::createWrite(req);
+
     pkt->dataDynamic<uint8_t>(data);
 
     //** Already has a request out this cycle
