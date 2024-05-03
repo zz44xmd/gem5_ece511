@@ -71,15 +71,15 @@ bool FedexCentral::processCmd(PacketPtr pkt){
 
     //** Testing Beta Part *******************************
     uint64_t* data = pkt->getPtr<uint64_t>();
-    Addr addrSrc = data[0];
-    Addr addrDest = data[1];
-    uint64_t sizeByte = data[2];
+    srcAddr = data[0];
+    dstAddr = data[1];
+    sizeByte = data[2];
 
-    std::cout << "FedexCentral Received addrSrc: " << std::hex << addrSrc << std::endl;
-    std::cout << "FedexCentral Received addrDest: " << std::hex << addrDest << std::endl;
+    std::cout << "FedexCentral Received addrSrc: " << std::hex << srcAddr << std::endl;
+    std::cout << "FedexCentral Received addrDest: " << std::hex << dstAddr << std::endl;
     std::cout << "FedexCentral Received sizeByte: " << std::dec << sizeByte << std::endl;
 
-    // valid = true;
+    valid = true;
     //****************************************************
 
     //** Add to Fedex Command Buffer
@@ -97,7 +97,7 @@ bool FedexCentral::processCmd(PacketPtr pkt){
 
 void FedexCentral::tick(){
     if (!valid) return;
-    std::cout << "Tick xD" << std::endl;
+    // std::cout << "Tick xD" << std::endl;
 
     //** Retry the failed operations
     retryFailedRead();
@@ -124,6 +124,8 @@ void FedexCentral::sendToReadTranslate(){
     //** We don't pressure read buffer if it's full
     if (readBuffer.size() >= readBufferEntriesCount)
         return;
+    if (remainSizeByte <= 0)
+        return;
 
     //** Find Request Size
     uint64_t src2AlignSize = BLOCK_CEILING(curSrcAddr) - curSrcAddr;
@@ -142,6 +144,7 @@ void FedexCentral::sendToReadTranslate(){
     DataTranslation<FedexCentral*> *translation
         = new DataTranslation<FedexCentral*>(this, state);
 
+    std::cout << "Translation request sent " << std::hex << curSrcAddr << " " << std::dec << req_size << std::endl;
     mmu->translateTiming(req, cpu->threadContexts[0], translation, mode);
 
     //** Update FedexCentral State
@@ -192,12 +195,12 @@ void FedexCentral::sendToWriteTranslate(){
 
 bool FedexCentral::updateWriteBuffer(PacketPtr pkt){
     
-
+    //!TODO
     return true;
 }
 
 void FedexCentral::sendWriteBuffer(){
-
+    //!TODO
 }
 
 /*************************************************************************/
@@ -243,6 +246,7 @@ void FedexCentral::finishTranslation(WholeTranslationState* state){
 
 bool FedexCentral::isSquashed(){
     std::cout << "Is Squashed xD" << std::endl;
+    //!Don't Care
     return false;
 }
 
@@ -251,7 +255,7 @@ bool FedexCentral::processReadBack(PacketPtr pkt){
 
     std::cout << "Processing Read Back xD" << std::endl;
 
-    
+    //!TODO
 
 
 
@@ -263,5 +267,7 @@ bool FedexCentral::processWriteBack(PacketPtr pkt){
     std::cout << "Processing Write Back xD" << std::endl;
     return true;
 }
+
+    //!TODO
 
 } // namespace gem5
