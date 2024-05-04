@@ -88,6 +88,7 @@ bool FedexCentral::processCmd(PacketPtr pkt){
     curSrcAddr = srcAddr;
     curDstAddr = dstAddr;
     remainSizeByte = sizeByte;
+    remainSizeByte_write = sizeByte;
 
     if (!tickEvent.scheduled()) {
         schedule(tickEvent, clockEdge(Cycles(1)));
@@ -108,6 +109,7 @@ void FedexCentral::tick(){
 
     //** Transfer Finished Read to Write. Handle MisAligned Case
     // updateWriteBuffer();
+    // sendToWriteTranslate();
 
     //** Add to Write Buffer and Send to Memory
     sendWriteBuffer();
@@ -144,7 +146,7 @@ void FedexCentral::sendToReadTranslate(){
     DataTranslation<FedexCentral*> *translation
         = new DataTranslation<FedexCentral*>(this, state);
 
-    std::cout << "Translation request sent " << std::hex << curSrcAddr << " " << std::dec << req_size << std::endl;
+    std::cout << "[+] Read Translation request sent " << std::hex << curSrcAddr << " " << std::dec << req_size << std::endl;
     mmu->translateTiming(req, cpu->threadContexts[0], translation, mode);
 
     //** Update FedexCentral State
@@ -185,27 +187,80 @@ void FedexCentral::retryFailedWrite(){
 }
 
 
-void FedexCentral::sendToWriteTranslate(){
+void FedexCentral::sendToWriteTranslate(PacketPtr readPkt){
 
     //** We don't pressure write buffer if it's full
     if (writeBuffer.size() >= writeBufferEntriesCount)
         return;
+    if (remainSizeByte_write <= 0)
+        return;
+   
+    uint64_t dst2AlignSize = BLOCK_CEILING(curDstAddr) - curDstAddr;
+    uint64_t write_size = std::min(remainSizeByte_write, std::min(dst2AlignSize, static_cast<uint64_t>(64)));
 
+    Request::FlagsType flags = 0;
+    BaseMMU::Mode mode = BaseMMU::Write;
+    uint8_t* newData = new uint8_t[write_size];
+    uint8_t* readData = readPkt->getPtr<uint8_t>();
+    if (readData == NULL) {
+        assert(flags & Request::STORE_NO_DATA);
+        // This must be a cache block cleaning request
+        memset(newData, 0, write_size);
+    } else {
+        memcpy(newData, readData, write_size);
+    }
+    for (unsigned int i = 0; i < write_size; i++) {
+        std::cout << std::hex << static_cast<uint32_t>(newData[i]) << " ";
+    }
+        
+    RequestPtr writeReq = std::make_shared<Request>(
+        curDstAddr, write_size, flags, dataRequestorId(), pc, 0);
+
+    WholeTranslationState* state =
+        new WholeTranslationState(writeReq, newData, NULL, mode);
+    DataTranslation<FedexCentral*>* translation =
+        new DataTranslation<FedexCentral*>(this, state);
+
+    std::cout << "[+] Write Translation request sent " << std::hex << curDstAddr << " " << std::dec << write_size << std::endl;
+    mmu->translateTiming(writeReq, cpu->threadContexts[0], translation, mode);
+
+    writeBuffer.push(writeReq);
+    remainSizeByte_write -= write_size;
+    curDstAddr += write_size;
 }
+
 
 bool FedexCentral::updateWriteBuffer(PacketPtr pkt){
     //!TODO
-    std::cout << "Received packet from memory:" << std::endl;
-    std::cout << "Command: " << pkt->cmdString() << std::endl;
-    std::cout << "Address: 0x" << std::hex << pkt->getAddr() << std::dec << std::endl;
-    std::cout << "Size: " << pkt->getSize() << " bytes" << std::endl;
+    if (pkt->isRead()) {
+        std::cout << "[+] Received read response from memory:" << std::endl;
+        std::cout << "Address: 0x" << std::hex << pkt->getAddr() << std::dec << std::endl;
+        std::cout << "Size: " << pkt->getSize() << " bytes" << std::endl;
 
-    uint8_t* data = pkt->getPtr<uint8_t>();
-    std::cout << "Data: ";
-    for (unsigned i = 0; i < pkt->getSize(); i++) {
-        std::cout << std::hex << static_cast<uint32_t>(data[i]) << " ";
+        uint8_t* data = pkt->getPtr<uint8_t>();
+        std::cout << "Data: ";
+        for (unsigned i = 0; i < pkt->getSize(); i++) {
+            std::cout << std::hex << static_cast<uint32_t>(data[i]) << " ";
+        }
+        std::cout << std::dec << std::endl;
+        std::cout << std::endl;
+
+        if (!readBuffer.empty()) {
+            readBuffer.pop();
+            sendToWriteTranslate(pkt);
+            std::cout << "sendToWriteTranslate call" << std::endl;
+        } else {
+            std::cerr << "Read buffer is empty, but received read response" << std::endl;
+        }
+    } else {
+        std::cout << "[+] Received write response from memory" << std::endl;
+
+        if (!writeBuffer.empty()) {
+            writeBuffer.pop();
+        } else {
+            std::cerr << "Write buffer is empty, but received write response" << std::endl;
+        }
     }
-    std::cout << std::dec << std::endl;
 
     return true;
 }

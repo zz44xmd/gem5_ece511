@@ -32,7 +32,7 @@ protected:
 
     void tick();
     void sendToReadTranslate();
-    void sendToWriteTranslate();
+    void sendToWriteTranslate(PacketPtr readPkt);
     bool updateWriteBuffer(PacketPtr pkt);
     void sendWriteBuffer();
 
@@ -55,6 +55,7 @@ private:
     Addr curSrcAddr;
     Addr curDstAddr;
     uint64_t remainSizeByte;
+    uint64_t remainSizeByte_write;
 
     //** Fedex Read Buffer
     std::queue<RequestPtr> readBuffer;
