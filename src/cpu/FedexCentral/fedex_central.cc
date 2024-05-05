@@ -82,7 +82,7 @@ bool FedexCentral::processCmd(PacketPtr pkt){
     std::cout << "FedexCentral Received addrSrc: " << std::hex << srcAddr << std::endl;
     std::cout << "FedexCentral Received addrDest: " << std::hex << dstAddr << std::endl;
     std::cout << "FedexCentral Received sizeByte: " << std::dec << sizeByte << std::endl;
-
+    std::cout << std::endl;
     valid = true;
     //****************************************************
 
@@ -130,7 +130,7 @@ void FedexCentral::tick(){
 void FedexCentral::sendToReadTranslate(){
 
     //** We don't pressure read buffer if it's full
-    if (readBuffer.size() >= readBufferEntriesCount)
+    if (retryReadBuffer.size() >= readBufferEntriesCount)
         return;
     if (remainSizeByte <= 0)
         return;
@@ -139,8 +139,8 @@ void FedexCentral::sendToReadTranslate(){
     uint64_t src2AlignSize = BLOCK_CEILING(curSrcAddr) - curSrcAddr;
     uint64_t req_size = std::min(remainSizeByte, std::min(src2AlignSize, static_cast<uint64_t>(64)));
     std::cout << "remainSizeByte " << std::dec << remainSizeByte << std::endl;
-    std::cout << "src2AlignSize " << std::dec << src2AlignSize << std::endl;
-    std::cout << "req_size " << std::dec << req_size << std::endl;
+    // std::cout << "src2AlignSize " << std::dec << src2AlignSize << std::endl;
+    // std::cout << "req_size " << std::dec << req_size << std::endl;
 
     //** Construct Request
     //!Don't Care about CONTEXT
@@ -155,11 +155,13 @@ void FedexCentral::sendToReadTranslate(){
     DataTranslation<FedexCentral*> *translation
         = new DataTranslation<FedexCentral*>(this, state);
 
-    std::cout << "[+] Read Translation request sent " << std::hex << curSrcAddr << " " << std::dec << req_size << std::endl;
+    std::cout << "[-] Read Translation request sent " << std::hex << curSrcAddr << " " << std::dec << req_size << std::endl;
+    std::cout << "[-] clockEdge is " << clockEdge() << std::endl;
+    std::cout << std::endl;
     mmu->translateTiming(req, cpu->threadContexts[0], translation, mode);
 
     //** Update FedexCentral State
-    readBuffer.push(req);
+    // readBuffer.push(req);
     numRead += 1;
     tried = true;
     remainSizeByte -= req_size;
@@ -174,7 +176,9 @@ void FedexCentral::retryFailedRead(){
     else if (clockEdge() == lastMemReqTick)
         return;
 
-    std::cout << "Retry Failed Read xD" << std::endl;
+    std::cout << "[-] Retry Failed Read xD" << std::endl;
+    std::cout << "[-] clockEdge is " << clockEdge() << std::endl;
+    std::cout << std::endl;
     PacketPtr pkt = retryReadBuffer.front();
     if (dataPort.sendTimingReq(pkt)){
         retryReadBuffer.pop();
@@ -189,7 +193,9 @@ void FedexCentral::retryFailedWrite(){
     else if (clockEdge() == lastMemReqTick)
         return;
 
-    std::cout << "Retry Failed Write xD" << std::endl;
+    std::cout << "[+] Retry Failed Write xD" << std::endl;
+    std::cout << "[+] clockEdge is " << clockEdge() << std::endl;
+    std::cout << std::endl;
     PacketPtr pkt = retryWriteBuffer.front();
     if (dataPort.sendTimingReq(pkt)){
         retryWriteBuffer.pop();
@@ -201,7 +207,7 @@ void FedexCentral::retryFailedWrite(){
 void FedexCentral::sendToWriteTranslate(PacketPtr readPkt){
 
     //** We don't pressure write buffer if it's full
-    if (writeBuffer.size() >= writeBufferEntriesCount)
+    if (retryWriteBuffer.size() >= writeBufferEntriesCount)
         return;
     if (remainSizeByte_write <= 0)
         return;
@@ -213,9 +219,9 @@ void FedexCentral::sendToWriteTranslate(PacketPtr readPkt){
     write_size = readPkt->getSize();
 
     std::cout << "remainSizeByte_write " << std::dec << remainSizeByte_write << std::endl;
-    std::cout << "dst2AlignSize " << std::dec << dst2AlignSize << std::endl;
-    std::cout << "static_cast<uint64_t>(64) " << std::dec << static_cast<uint64_t>(64) << std::endl;
-    std::cout << "write_size " << std::dec << write_size << std::endl;
+    // std::cout << "dst2AlignSize " << std::dec << dst2AlignSize << std::endl;
+    // std::cout << "static_cast<uint64_t>(64) " << std::dec << static_cast<uint64_t>(64) << std::endl;
+    // std::cout << "write_size " << std::dec << write_size << std::endl;
 
 
     Request::FlagsType flags = 0;
@@ -232,6 +238,7 @@ void FedexCentral::sendToWriteTranslate(PacketPtr readPkt){
     for (unsigned int i = 0; i < write_size; i++) {
         std::cout << std::hex << static_cast<uint32_t>(newData[i]) << " ";
     }
+    std::cout << std::endl;
         
     RequestPtr writeReq = std::make_shared<Request>(
         curDstAddr, write_size, flags, dataRequestorId(), pc, 0);
@@ -240,11 +247,12 @@ void FedexCentral::sendToWriteTranslate(PacketPtr readPkt){
         new WholeTranslationState(writeReq, newData, NULL, mode);
     DataTranslation<FedexCentral*>* translation =
         new DataTranslation<FedexCentral*>(this, state);
-
     std::cout << "[+] Write Translation request sent " << std::hex << curDstAddr << " " << std::dec << write_size << std::endl;
+    std::cout << "[+] clockEdge is " << clockEdge() << std::endl;
+    std::cout << std::endl;
     mmu->translateTiming(writeReq, cpu->threadContexts[0], translation, mode);
 
-    writeBuffer.push(writeReq);
+    // writeBuffer.push(writeReq);
     remainSizeByte_write -= write_size;
     curDstAddr += write_size;
 }
@@ -257,32 +265,28 @@ bool FedexCentral::updateWriteBuffer(PacketPtr pkt){
         return true;
     }
     if (pkt->isRead()) {
-        std::cout << "[+] Received read response from memory:" << std::endl;
+        std::cout << "[-] Received read response from memory:" << std::endl;
+        std::cout << "[-] clockEdge is " << clockEdge() << std::endl;
+        // std::cout << std::endl;
         std::cout << "Address: 0x" << std::hex << pkt->getAddr() << std::dec << std::endl;
-        std::cout << "Size: " << pkt->getSize() << " bytes" << std::endl;
+        // std::cout << "Size: " << pkt->getSize() << " bytes" << std::endl;
 
         uint8_t* data = pkt->getPtr<uint8_t>();
-        std::cout << "Data: ";
-        for (unsigned i = 0; i < pkt->getSize(); i++) {
-            std::cout << std::hex << static_cast<uint32_t>(data[i]) << " ";
-        }
+        // std::cout << "Data: ";
+        // for (unsigned i = 0; i < pkt->getSize(); i++) {
+        //     std::cout << std::hex << static_cast<uint32_t>(data[i]) << " ";
+        // }
         std::cout << std::dec << std::endl;
         std::cout << std::endl;
-
-        // if (!readBuffer.empty()) {
-            // readBuffer.pop();
         sendToWriteTranslate(pkt);
         std::cout << "sendToWriteTranslate call" << std::endl;
-        // } else {
-            // std::cerr << "Read buffer is empty, but received read response" << std::endl;
+        std::cout << "[+] clockEdge is " << clockEdge() << std::endl;
+
     } else {
+
         std::cout << "[+] Received write response from memory" << std::endl;
+        std::cout << "[+] clockEdge is " << clockEdge() << std::endl;
         numWriteDone += 1;
-        // if (!writeBuffer.empty()) {
-        //     writeBuffer.pop();
-        // } else {
-        //     std::cerr << "Write buffer is empty, but received write response" << std::endl;
-        // }
     }
 
     return true;
@@ -303,35 +307,60 @@ void FedexCentral::sendToMemory(const RequestPtr &req, uint8_t *data, uint64_t *
     PacketPtr pkt = read ? Packet::createRead(req) : Packet::createWrite(req);
 
     pkt->dataDynamic<uint8_t>(data);
-
+    if (!retryReadBuffer.empty() && read){
+        retryReadBuffer.push(pkt);
+        std::cout << std::endl;
+        std::cout << "[-] move to retryReadBuffer beacuase of retryReadBuffer not empty" << std::endl;
+        std::cout << "[-] clockEdge is " << clockEdge() << std::endl;
+        std::cout << std::endl;
+        return;
+    }
+    if (!retryWriteBuffer.empty() &&!read){
+        retryWriteBuffer.push(pkt);
+        std::cout << "[+] move to retryWriteBuffer beacuase of retryWriteBuffer not empty" << std::endl;
+        std::cout << "[+] clockEdge is " << clockEdge() << std::endl;
+        std::cout << std::endl;
+        return;
+    }
     //** Already has a request out this cycle
     if (clockEdge() == lastMemReqTick){
         if (read){
             retryReadBuffer.push(pkt);
-            readBuffer.pop();
-
+            std::cout << "[-] move to retryReadBuffer Already has a request out this cycle" << std::endl;
+            std::cout << "[-] clockEdge is " << clockEdge() << std::endl;
+            std::cout << std::endl;
         } else {
             retryWriteBuffer.push(pkt);
-            writeBuffer.pop();
+            std::cout << "[+] move to retryWriteBuffer Already has a request out this cycle" << std::endl;
+            std::cout << "[+] clockEdge is " << clockEdge() << std::endl;
+            std::cout << std::endl;
         }
         return;
     }
-
+    std::cout << "clockEdge != lastMemReqTick" << std::endl;
+    std::cout << "lastMemReqTick " << std::dec << lastMemReqTick << std::endl;
+    std::cout << "clockEdge is " << std::dec << clockEdge() << std::endl;
     if (dataPort.sendTimingReq(pkt)){
         lastMemReqTick = clockEdge();
         if (read){
-            readBuffer.pop();
+            std::cout << "[-] Read Request sent" << std::endl;
+            std::cout << std::endl;
         }
         else {
-            writeBuffer.pop();
+            std::cout << "[+] Write Request sent" << std::endl;
+            std::cout << std::endl;
         }
     } else if (read){
         retryReadBuffer.push(pkt);
-        readBuffer.pop();
+        std::cout << "[-] sendTimingReq fails, RetryRead Request sent" << std::endl;
+        std::cout << "[-] clockEdge is " << clockEdge() << std::endl;
+        std::cout << std::endl;
     } else {
         retryWriteBuffer.push(pkt);
-        writeBuffer.pop(); 
-    }
+        std::cout << "[+] sendTimingReq fails, RetryWrite Request sent" << std::endl;
+        std::cout << "[+] clockEdge is " << clockEdge() << std::endl;
+        std::cout << std::endl;
+        }
 }
 
 
