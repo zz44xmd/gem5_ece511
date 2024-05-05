@@ -77,6 +77,7 @@ bool FedexCentral::processCmd(PacketPtr pkt){
     numRead = 0;
     numWriteDone = 0;
     tried = false;
+    writesent = false;
 
 
     std::cout << "FedexCentral Received addrSrc: " << std::hex << srcAddr << std::endl;
@@ -117,12 +118,20 @@ void FedexCentral::tick(){
 
     //** Add to Write Buffer and Send to Memory
     sendWriteBuffer();
+    // oneCycleDelayforWrite();
 
     processCmdDone();
 
 
     if (!tickEvent.scheduled()) {
-        schedule(tickEvent, clockEdge(Cycles(1)));
+        if (writesent == true){
+            schedule(tickEvent, clockEdge(Cycles(2)));
+            writesent = false;
+        }
+        else 
+        {
+           schedule(tickEvent, clockEdge(Cycles(1))); 
+        }
     }
 }
 
@@ -175,14 +184,18 @@ void FedexCentral::retryFailedRead(){
         return;
     else if (clockEdge() == lastMemReqTick)
         return;
-
     std::cout << "[-] Retry Failed Read xD" << std::endl;
     std::cout << "[-] clockEdge is " << clockEdge() << std::endl;
-    std::cout << std::endl;
     PacketPtr pkt = retryReadBuffer.front();
     if (dataPort.sendTimingReq(pkt)){
+        std::cout << "[-] Read Request sent from retryReadBuffer" << std::endl;
+        std::cout << std::endl;
         retryReadBuffer.pop();
         lastMemReqTick = clockEdge();
+    }
+    else {
+        std::cout << "[-] Failed to send request from retryReadBuffer" << std::endl;
+        std::cout << std::endl;
     }
 }
 
@@ -198,8 +211,14 @@ void FedexCentral::retryFailedWrite(){
     std::cout << std::endl;
     PacketPtr pkt = retryWriteBuffer.front();
     if (dataPort.sendTimingReq(pkt)){
+        std::cout << "[+] Write Request sent from retryWriteBuffer" << std::endl;
+        std::cout << std::endl;
         retryWriteBuffer.pop();
         lastMemReqTick = clockEdge();
+    }
+    else{
+        std::cout << "[+] Failed to send request from retryWriteBuffer" << std::endl;
+        std::cout << std::endl;
     }
 }
 
@@ -271,7 +290,7 @@ bool FedexCentral::updateWriteBuffer(PacketPtr pkt){
         std::cout << "Address: 0x" << std::hex << pkt->getAddr() << std::dec << std::endl;
         // std::cout << "Size: " << pkt->getSize() << " bytes" << std::endl;
 
-        uint8_t* data = pkt->getPtr<uint8_t>();
+        // uint8_t* data = pkt->getPtr<uint8_t>();
         // std::cout << "Data: ";
         // for (unsigned i = 0; i < pkt->getSize(); i++) {
         //     std::cout << std::hex << static_cast<uint32_t>(data[i]) << " ";
@@ -349,6 +368,7 @@ void FedexCentral::sendToMemory(const RequestPtr &req, uint8_t *data, uint64_t *
         else {
             std::cout << "[+] Write Request sent" << std::endl;
             std::cout << std::endl;
+            writesent = true;
         }
     } else if (read){
         retryReadBuffer.push(pkt);
@@ -390,9 +410,6 @@ bool FedexCentral::processReadBack(PacketPtr pkt){
     std::cout << "Processing Read Back xD" << std::endl;
 
     //!TODO
-
-
-
     return true;
 }
 
@@ -405,13 +422,11 @@ bool FedexCentral::processWriteBack(PacketPtr pkt){
     //!TODO
 
 
-
 void FedexCentral::processCmdDone(){
     if (tried && (numRead == numWriteDone)){
         valid = false;
         std::cout << "FedexCentral Command Done xD" << std::endl;
     }
 }
-
 
 } // namespace gem5

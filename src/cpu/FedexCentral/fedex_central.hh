@@ -60,6 +60,7 @@ private:
     uint64_t numRead;
     uint64_t numWriteDone;
     bool tried;
+    bool writesent;
 
     //** Fedex Read Buffer
     std::queue<RequestPtr> readBuffer;
