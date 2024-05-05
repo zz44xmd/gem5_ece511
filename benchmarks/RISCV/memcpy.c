@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MEMCPY_SRC "Hello, RISC-V!"
+#define MEMCPY_SRC "Hello, RISCV!"
 
 #define MEMCPY(src, dest, len) \
     asm volatile ("memcpy %0, %1, %2" : : "r" (src), "r" (dest), "r" (len));
@@ -15,7 +15,7 @@ int main() {
     
     char *src_ptr = (char*)src;
     char *dest_ptr = (char*)dest;
-
+    // MEMCPY(dest_ptr, dest_ptr, len);
     MEMCPY(src_ptr, dest_ptr, len);
     
     /******* Some Other calculations *******/

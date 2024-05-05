@@ -38,6 +38,7 @@ protected:
 
     void retryFailedRead();
     void retryFailedWrite();
+    void processCmdDone();
 
     EventFunctionWrapper tickEvent;
 
@@ -56,6 +57,9 @@ private:
     Addr curDstAddr;
     uint64_t remainSizeByte;
     uint64_t remainSizeByte_write;
+    uint64_t numRead;
+    uint64_t numWriteDone;
+    bool tried;
 
     //** Fedex Read Buffer
     std::queue<RequestPtr> readBuffer;

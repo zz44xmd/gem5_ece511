@@ -65,15 +65,19 @@ Port& FedexCentral::getPort(const std::string &if_name, PortID idx)
 bool FedexCentral::processCmd(PacketPtr pkt){
     std::cout << "Processing Command xD" << std::endl;
 
-    if (valid){
-        panic("Still processing previous Fedex Command"); 
-    }
+    // if (valid){
+    //     panic("Still processing previous Fedex Command"); 
+    // }
 
     //** Testing Beta Part *******************************
     uint64_t* data = pkt->getPtr<uint64_t>();
     srcAddr = data[0];
     dstAddr = data[1];
     sizeByte = data[2];
+    numRead = 0;
+    numWriteDone = 0;
+    tried = false;
+
 
     std::cout << "FedexCentral Received addrSrc: " << std::hex << srcAddr << std::endl;
     std::cout << "FedexCentral Received addrDest: " << std::hex << dstAddr << std::endl;
@@ -114,6 +118,8 @@ void FedexCentral::tick(){
     //** Add to Write Buffer and Send to Memory
     sendWriteBuffer();
 
+    processCmdDone();
+
 
     if (!tickEvent.scheduled()) {
         schedule(tickEvent, clockEdge(Cycles(1)));
@@ -132,6 +138,9 @@ void FedexCentral::sendToReadTranslate(){
     //** Find Request Size
     uint64_t src2AlignSize = BLOCK_CEILING(curSrcAddr) - curSrcAddr;
     uint64_t req_size = std::min(remainSizeByte, std::min(src2AlignSize, static_cast<uint64_t>(64)));
+    std::cout << "remainSizeByte " << std::dec << remainSizeByte << std::endl;
+    std::cout << "src2AlignSize " << std::dec << src2AlignSize << std::endl;
+    std::cout << "req_size " << std::dec << req_size << std::endl;
 
     //** Construct Request
     //!Don't Care about CONTEXT
@@ -151,6 +160,8 @@ void FedexCentral::sendToReadTranslate(){
 
     //** Update FedexCentral State
     readBuffer.push(req);
+    numRead += 1;
+    tried = true;
     remainSizeByte -= req_size;
     curSrcAddr += req_size;
 }
@@ -197,6 +208,15 @@ void FedexCentral::sendToWriteTranslate(PacketPtr readPkt){
    
     uint64_t dst2AlignSize = BLOCK_CEILING(curDstAddr) - curDstAddr;
     uint64_t write_size = std::min(remainSizeByte_write, std::min(dst2AlignSize, static_cast<uint64_t>(64)));
+    // if (write_size == readPkt->getSize()){       
+    // }
+    write_size = readPkt->getSize();
+
+    std::cout << "remainSizeByte_write " << std::dec << remainSizeByte_write << std::endl;
+    std::cout << "dst2AlignSize " << std::dec << dst2AlignSize << std::endl;
+    std::cout << "static_cast<uint64_t>(64) " << std::dec << static_cast<uint64_t>(64) << std::endl;
+    std::cout << "write_size " << std::dec << write_size << std::endl;
+
 
     Request::FlagsType flags = 0;
     BaseMMU::Mode mode = BaseMMU::Write;
@@ -232,6 +252,10 @@ void FedexCentral::sendToWriteTranslate(PacketPtr readPkt){
 
 bool FedexCentral::updateWriteBuffer(PacketPtr pkt){
     //!TODO
+    if (remainSizeByte_write <= 0){
+        valid = false;
+        return true;
+    }
     if (pkt->isRead()) {
         std::cout << "[+] Received read response from memory:" << std::endl;
         std::cout << "Address: 0x" << std::hex << pkt->getAddr() << std::dec << std::endl;
@@ -245,21 +269,20 @@ bool FedexCentral::updateWriteBuffer(PacketPtr pkt){
         std::cout << std::dec << std::endl;
         std::cout << std::endl;
 
-        if (!readBuffer.empty()) {
-            readBuffer.pop();
-            sendToWriteTranslate(pkt);
-            std::cout << "sendToWriteTranslate call" << std::endl;
-        } else {
-            std::cerr << "Read buffer is empty, but received read response" << std::endl;
-        }
+        // if (!readBuffer.empty()) {
+            // readBuffer.pop();
+        sendToWriteTranslate(pkt);
+        std::cout << "sendToWriteTranslate call" << std::endl;
+        // } else {
+            // std::cerr << "Read buffer is empty, but received read response" << std::endl;
     } else {
         std::cout << "[+] Received write response from memory" << std::endl;
-
-        if (!writeBuffer.empty()) {
-            writeBuffer.pop();
-        } else {
-            std::cerr << "Write buffer is empty, but received write response" << std::endl;
-        }
+        numWriteDone += 1;
+        // if (!writeBuffer.empty()) {
+        //     writeBuffer.pop();
+        // } else {
+        //     std::cerr << "Write buffer is empty, but received write response" << std::endl;
+        // }
     }
 
     return true;
@@ -283,16 +306,31 @@ void FedexCentral::sendToMemory(const RequestPtr &req, uint8_t *data, uint64_t *
 
     //** Already has a request out this cycle
     if (clockEdge() == lastMemReqTick){
-        retryReadBuffer.push(pkt);
+        if (read){
+            retryReadBuffer.push(pkt);
+            readBuffer.pop();
+
+        } else {
+            retryWriteBuffer.push(pkt);
+            writeBuffer.pop();
+        }
         return;
     }
 
     if (dataPort.sendTimingReq(pkt)){
         lastMemReqTick = clockEdge();
+        if (read){
+            readBuffer.pop();
+        }
+        else {
+            writeBuffer.pop();
+        }
     } else if (read){
         retryReadBuffer.push(pkt);
+        readBuffer.pop();
     } else {
         retryWriteBuffer.push(pkt);
+        writeBuffer.pop(); 
     }
 }
 
@@ -336,5 +374,15 @@ bool FedexCentral::processWriteBack(PacketPtr pkt){
 }
 
     //!TODO
+
+
+
+void FedexCentral::processCmdDone(){
+    if (tried && (numRead == numWriteDone)){
+        valid = false;
+        std::cout << "FedexCentral Command Done xD" << std::endl;
+    }
+}
+
 
 } // namespace gem5
