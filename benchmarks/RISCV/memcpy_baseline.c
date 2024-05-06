@@ -33,7 +33,7 @@ int main() {
     }
 
     // MEMCPY(dest_ptr, dest_ptr, len);
-    MEMCPY(src_ptr, dst_ptr, size);
+    memcpy(src_p, dst_p, size);
     /******* Some Other calculations *******/
     for (unsigned k = 0; k < DIM; ++k) {
         for (unsigned i = 0; i < DIM; ++i) {
@@ -44,12 +44,12 @@ int main() {
     }
     /***************************************/
 
-    if (memcmp((const void*)src_ptr, (const void*)dst_ptr, size) != 0) {
+    if (memcmp((const void*)src_p, (const void*)dst_p, size) != 0) {
         printf("[[FAILED]]\n");
         return -1;
     }
     printf("[[PASSED]]\n");
-    printf("src: %s\n", src_ptr);
-    printf("dst: %s\n", dst_ptr);
+    printf("src: %s\n", src_p);
+    printf("dst: %s\n", dst_p);
     return 0;
 }
