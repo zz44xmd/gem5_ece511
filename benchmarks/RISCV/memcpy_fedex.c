@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define DIM 1025
+#define DIM 129
 
 #define SIZE (64L << 20)
 #define ALIGN (4L << 20)
