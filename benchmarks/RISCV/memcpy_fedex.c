@@ -19,8 +19,9 @@ int main() {
 
     int size = 4L << 10;
 
-    char *src_p = ((unsigned long)buf_src + (ALIGN - 1)) & (~(ALIGN - 1));
-    char *dst_p = ((unsigned long)buf_dst + (ALIGN - 1)) & (~(ALIGN - 1));
+    char *src_p = (char *)(((unsigned long)buf_src + (ALIGN - 1)) & (~(ALIGN - 1)));
+    char *dst_p = (char *)(((unsigned long)buf_dst + (ALIGN - 1)) & (~(ALIGN - 1)));
+
 
     for (unsigned long i = 0; i < size; ++i) {
         src_p[i] = i % 64 + 32;
