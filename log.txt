@@ -6,9 +6,9 @@ gem5 Simulator System.  https://www.gem5.org
 gem5 is copyrighted software; use the --copyright option for details.
 
 gem5 version 22.0.0.1
-gem5 compiled May  5 2024 01:07:10
-gem5 started May  5 2024 03:26:46
-gem5 executing on dec173fc1a1c, pid 2335
+gem5 compiled May  5 2024 22:39:51
+gem5 started May  6 2024 01:31:50
+gem5 executing on 5591123aeeaa, pid 552
 command line: ./build/RISCV/gem5.debug configs/fedex_config.py -c benchmarks/RISCV/memcpy
 
 Trying to run program:  benchmarks/RISCV/memcpy
@@ -19,44 +19,42 @@ Processing Command xD
 FedexCentral Received addrSrc: 7ffffffffffffef8
 FedexCentral Received addrDest: 7ffffffffffffee8
 FedexCentral Received sizeByte: 14
+
 remainSizeByte 14
-src2AlignSize 8
-req_size 8
-[+] Read Translation request sent 7ffffffffffffef8 8
+[-] Read Translation request sent 7ffffffffffffef8 8
+[-] clockEdge is 1486000
+
 Finish Translation xD
 Send to Memory xD
+clockEdge != lastMemReqTick
+lastMemReqTick 0
+clockEdge is 1486000
+[-] Read Request sent
+
 remainSizeByte 6
-src2AlignSize 64
-req_size 6
-[+] Read Translation request sent 7fffffffffffff00 6
+[-] Read Translation request sent 7fffffffffffff00 6
+[-] clockEdge is 1487000
+
 Finish Translation xD
 Send to Memory xD
+clockEdge != lastMemReqTick
+lastMemReqTick 1486000
+clockEdge is 1487000
+[-] Read Request sent
+
 Received pkt from Memory
-[+] Received read response from memory:
+[-] Received read response from memory:
+[-] clockEdge is 1488000
 Address: 0xcef8
-Size: 8 bytes
-Data: 48 65 6c 6c 6f 2c 20 52 
+
 
 remainSizeByte_write 14
-dst2AlignSize 24
-static_cast<uint64_t>(64) 64
-write_size 8
-48 65 6c 6c 6f 2c 20 52 [+] Write Translation request sent 7ffffffffffffee8 8
-Finish Translation xD
-Send to Memory xD
-sendToWriteTranslate call
-Received pkt from Memory
-[+] Received read response from memory:
-Address: 0xcf00
-Size: 6 bytes
-Data: 49 53 43 56 21 0 
+48 65 6c 6c 6f 2c 20 52 
+[+] Write Translation request sent 7ffffffffffffee8 8
+[+] clockEdge is 1488000
 
-remainSizeByte_write 6
-dst2AlignSize 16
-static_cast<uint64_t>(64) 64
-write_size 6
-49 53 43 56 21 0 [+] Write Translation request sent 7ffffffffffffef0 6
 Finish Translation xD
 Send to Memory xD
-sendToWriteTranslate call
-Retry Failed Write xD
+clockEdge != lastMemReqTick
+lastMemReqTick 1487000
+clockEdge is 1488000

@@ -1,0 +1,272 @@
+Global frequency set at 1000000000000 ticks per second
+[CPU] DataRequestor ID is 6
+[FedexC]Init FedexCentral Station xD
+[FedexC]Data Requestor ID: 7
+gem5 Simulator System.  https://www.gem5.org
+gem5 is copyrighted software; use the --copyright option for details.
+
+gem5 version 22.0.0.1
+gem5 compiled May  5 2024 07:54:45
+gem5 started May  5 2024 07:59:43
+gem5 executing on dec173fc1a1c, pid 3351
+command line: ./build/RISCV/gem5.debug configs/fedex_config.py -c benchmarks/RISCV/memcpy
+
+Trying to run program:  benchmarks/RISCV/memcpy
+Setting Program to run:  benchmarks/RISCV/memcpy
+FedexMemcpyInitiateAcc
+
+Processing Command xD
+FedexCentral Received addrSrc: 7ffffffffffffbe8
+FedexCentral Received addrDest: 7ffffffffffff8c8
+FedexCentral Received sizeByte: 796
+
+remainSizeByte 796
+[-] Read Translation request sent 7ffffffffffffbe8 24
+[-] clockEdge is 2271000
+
+Finish Translation xD
+Send to Memory xD
+clockEdge != lastMemReqTick
+lastMemReqTick 0
+clockEdge is 2271000
+[+] Write Request sent
+
+remainSizeByte 772
+[-] Read Translation request sent 7ffffffffffffc00 64
+[-] clockEdge is 2272000
+
+Finish Translation xD
+Send to Memory xD
+clockEdge != lastMemReqTick
+lastMemReqTick 2271000
+clockEdge is 2272000
+[+] sendTimingReq fails, RetryWrite Request sent
+[+] clockEdge is 2272000
+
+Received pkt from Memory
+[+] Received write response from memory
+[+] clockEdge is 2273000
+[+] Retry Failed Write xD
+[+] clockEdge is 2273000
+
+remainSizeByte 708
+[-] Read Translation request sent 7ffffffffffffc40 64
+[-] clockEdge is 2273000
+
+Finish Translation xD
+Send to Memory xD
+[+] move to retryWriteBuffer Already has a request out this cycle
+[+] clockEdge is 2273000
+
+[+] Retry Failed Write xD
+[+] clockEdge is 2274000
+
+remainSizeByte 644
+[-] Read Translation request sent 7ffffffffffffc80 64
+[-] clockEdge is 2274000
+
+Finish Translation xD
+Send to Memory xD
+[+] move to retryWriteBuffer beacuase of retryWriteBuffer not empty
+[+] clockEdge is 2274000
+
+Received pkt from Memory
+[+] Received write response from memory
+[+] clockEdge is 2275000
+[+] Retry Failed Write xD
+[+] clockEdge is 2275000
+
+remainSizeByte 580
+[-] Read Translation request sent 7ffffffffffffcc0 64
+[-] clockEdge is 2275000
+
+Finish Translation xD
+Send to Memory xD
+[+] move to retryWriteBuffer beacuase of retryWriteBuffer not empty
+[+] clockEdge is 2275000
+
+[+] Retry Failed Write xD
+[+] clockEdge is 2276000
+
+remainSizeByte 516
+[-] Read Translation request sent 7ffffffffffffd00 64
+[-] clockEdge is 2276000
+
+Finish Translation xD
+Send to Memory xD
+[+] move to retryWriteBuffer beacuase of retryWriteBuffer not empty
+[+] clockEdge is 2276000
+
+Received pkt from Memory
+[+] Received write response from memory
+[+] clockEdge is 2277000
+[+] Retry Failed Write xD
+[+] clockEdge is 2277000
+
+remainSizeByte 452
+[-] Read Translation request sent 7ffffffffffffd40 64
+[-] clockEdge is 2277000
+
+Finish Translation xD
+Send to Memory xD
+[+] move to retryWriteBuffer beacuase of retryWriteBuffer not empty
+[+] clockEdge is 2277000
+
+[+] Retry Failed Write xD
+[+] clockEdge is 2278000
+
+remainSizeByte 388
+[-] Read Translation request sent 7ffffffffffffd80 64
+[-] clockEdge is 2278000
+
+Finish Translation xD
+Send to Memory xD
+[+] move to retryWriteBuffer beacuase of retryWriteBuffer not empty
+[+] clockEdge is 2278000
+
+Received pkt from Memory
+[+] Received write response from memory
+[+] clockEdge is 2279000
+[+] Retry Failed Write xD
+[+] clockEdge is 2279000
+
+remainSizeByte 324
+[-] Read Translation request sent 7ffffffffffffdc0 64
+[-] clockEdge is 2279000
+
+Finish Translation xD
+Send to Memory xD
+[+] move to retryWriteBuffer beacuase of retryWriteBuffer not empty
+[+] clockEdge is 2279000
+
+[+] Retry Failed Write xD
+[+] clockEdge is 2280000
+
+remainSizeByte 260
+[-] Read Translation request sent 7ffffffffffffe00 64
+[-] clockEdge is 2280000
+
+Finish Translation xD
+Send to Memory xD
+[+] move to retryWriteBuffer beacuase of retryWriteBuffer not empty
+[+] clockEdge is 2280000
+
+Received pkt from Memory
+[+] Received write response from memory
+[+] clockEdge is 2281000
+[+] Retry Failed Write xD
+[+] clockEdge is 2281000
+
+remainSizeByte 196
+[-] Read Translation request sent 7ffffffffffffe40 64
+[-] clockEdge is 2281000
+
+Finish Translation xD
+Send to Memory xD
+[+] move to retryWriteBuffer beacuase of retryWriteBuffer not empty
+[+] clockEdge is 2281000
+
+[+] Retry Failed Write xD
+[+] clockEdge is 2282000
+
+remainSizeByte 132
+[-] Read Translation request sent 7ffffffffffffe80 64
+[-] clockEdge is 2282000
+
+Finish Translation xD
+Send to Memory xD
+[+] move to retryWriteBuffer beacuase of retryWriteBuffer not empty
+[+] clockEdge is 2282000
+
+Received pkt from Memory
+[+] Received write response from memory
+[+] clockEdge is 2283000
+[+] Retry Failed Write xD
+[+] clockEdge is 2283000
+
+remainSizeByte 68
+[-] Read Translation request sent 7ffffffffffffec0 64
+[-] clockEdge is 2283000
+
+Finish Translation xD
+Send to Memory xD
+[+] move to retryWriteBuffer beacuase of retryWriteBuffer not empty
+[+] clockEdge is 2283000
+
+[+] Retry Failed Write xD
+[+] clockEdge is 2284000
+
+remainSizeByte 4
+[-] Read Translation request sent 7fffffffffffff00 4
+[-] clockEdge is 2284000
+
+Finish Translation xD
+Send to Memory xD
+[+] move to retryWriteBuffer beacuase of retryWriteBuffer not empty
+[+] clockEdge is 2284000
+
+Received pkt from Memory
+[+] Received write response from memory
+[+] clockEdge is 2285000
+[+] Retry Failed Write xD
+[+] clockEdge is 2285000
+
+[+] Retry Failed Write xD
+[+] clockEdge is 2286000
+
+Received pkt from Memory
+[+] Received write response from memory
+[+] clockEdge is 2287000
+[+] Retry Failed Write xD
+[+] clockEdge is 2287000
+
+[+] Retry Failed Write xD
+[+] clockEdge is 2288000
+
+Received pkt from Memory
+[+] Received write response from memory
+[+] clockEdge is 2289000
+[+] Retry Failed Write xD
+[+] clockEdge is 2289000
+
+[+] Retry Failed Write xD
+[+] clockEdge is 2290000
+
+Received pkt from Memory
+[+] Received write response from memory
+[+] clockEdge is 2291000
+[+] Retry Failed Write xD
+[+] clockEdge is 2291000
+
+[+] Retry Failed Write xD
+[+] clockEdge is 2292000
+
+Received pkt from Memory
+[+] Received write response from memory
+[+] clockEdge is 2293000
+[+] Retry Failed Write xD
+[+] clockEdge is 2293000
+
+[+] Retry Failed Write xD
+[+] clockEdge is 2294000
+
+Received pkt from Memory
+[+] Received write response from memory
+[+] clockEdge is 2295000
+[+] Retry Failed Write xD
+[+] clockEdge is 2295000
+
+[+] Retry Failed Write xD
+[+] clockEdge is 2296000
+
+Received pkt from Memory
+[+] Received write response from memory
+[+] clockEdge is 2297000
+[+] Retry Failed Write xD
+[+] clockEdge is 2297000
+
+Received pkt from Memory
+[+] Received write response from memory
+[+] clockEdge is 2299000
+FedexCentral Command Done xD
+[[FAILED]]
