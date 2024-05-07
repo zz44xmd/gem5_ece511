@@ -83,6 +83,7 @@ bool FedexCentral::processCmd(PacketPtr pkt){
     std::cout << "FedexCentral Received addrSrc: " << std::hex << srcAddr << std::endl;
     std::cout << "FedexCentral Received addrDest: " << std::hex << dstAddr << std::endl;
     std::cout << "FedexCentral Received sizeByte: " << std::dec << sizeByte << std::endl;
+    std::cout << "[!!] begin clockedge is " << clockEdge() << std::endl;
     std::cout << std::endl;
     valid = true;
     //****************************************************
@@ -235,9 +236,13 @@ void FedexCentral::sendToWriteTranslate(PacketPtr readPkt){
     uint64_t write_size = std::min(remainSizeByte_write, std::min(dst2AlignSize, static_cast<uint64_t>(64)));
     // if (write_size == readPkt->getSize()){       
     // }
+    std::cout << "[++] dst2AlignSize is " << std::dec << dst2AlignSize << std::endl;
+    std::cout << "static_cast<uint64_t>(64) " << std::dec << static_cast<uint64_t>(64) << std::endl;
+    std::cout << "remainSizeByte_write is " << std::dec << remainSizeByte_write << std::endl;
     write_size = readPkt->getSize();
+    std::cout << "readPkt size is " << std::dec << readPkt->getSize() << std::endl;
 
-    std::cout << "remainSizeByte_write " << std::dec << remainSizeByte_write << std::endl;
+    // std::cout << "remainSizeByte_write " << std::dec << remainSizeByte_write << std::endl;
     // std::cout << "dst2AlignSize " << std::dec << dst2AlignSize << std::endl;
     // std::cout << "static_cast<uint64_t>(64) " << std::dec << static_cast<uint64_t>(64) << std::endl;
     // std::cout << "write_size " << std::dec << write_size << std::endl;
@@ -281,6 +286,9 @@ bool FedexCentral::updateWriteBuffer(PacketPtr pkt){
     //!TODO
     if (remainSizeByte_write <= 0){
         valid = false;
+        std::cout << "[!!] Program finish " << std::endl;
+        std::cout << "[!!] Clockedge is " << clockEdge() << std::endl;
+        std::cout << std::endl;
         return true;
     }
     if (pkt->isRead()) {
@@ -302,7 +310,6 @@ bool FedexCentral::updateWriteBuffer(PacketPtr pkt){
         std::cout << "[+] clockEdge is " << clockEdge() << std::endl;
 
     } else {
-
         std::cout << "[+] Received write response from memory" << std::endl;
         std::cout << "[+] clockEdge is " << clockEdge() << std::endl;
         numWriteDone += 1;
@@ -394,6 +401,14 @@ void FedexCentral::finishTranslation(WholeTranslationState* state){
         state->deleteReqs();
         assert(false);
     } else {
+        // Addr physAddr = state->mainReq->getPaddr();
+        // uint64_t alignedAddr = BLOCK_CEILING(physAddr);
+        // uint64_t alignSize = alignedAddr - physAddr;
+        // std::cout << "[!!]alignedAddr " << std::hex << alignedAddr << std::dec << std::endl;
+        // std::cout << "alignSize " << std::hex << alignSize << std::dec << std::endl;
+        // std::cout << std::endl;
+        // uint64_t reqSize = std::min(static_cast<uint64_t>(state->mainReq->getSize()), std::min(alignSize, static_cast<uint64_t>(64)));
+        // uint64_t write_size = std::min(remainSizeByte_write, std::min(dst2AlignSize, static_cast<uint64_t>(64)));
         sendToMemory(state->mainReq, state->data, state->res, state->mode == BaseMMU::Read);
     }
 }
